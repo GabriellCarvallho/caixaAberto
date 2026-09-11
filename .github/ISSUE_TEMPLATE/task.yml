@@ -1,0 +1,29 @@
+name: Task técnica
+description: Registre trabalho técnico vinculado ao OpenProject.
+title: 'chore: '
+body:
+  - type: input
+    id: openproject
+    attributes:
+      label: Task do OpenProject
+      placeholder: '#31402'
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objetivo
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceitação
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Responsável
+    validations:
+      required: true

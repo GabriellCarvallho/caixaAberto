@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: caixa_aberto
+      POSTGRES_PASSWORD: caixa_aberto
+      POSTGRES_USER: caixa_aberto
+      TZ: America/Fortaleza
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U caixa_aberto -d caixa_aberto']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: caixa_aberto_test
+      POSTGRES_PASSWORD: caixa_aberto
+      POSTGRES_USER: caixa_aberto
+      TZ: America/Fortaleza
+    ports:
+      - '5433:5432'
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U caixa_aberto -d caixa_aberto_test']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:

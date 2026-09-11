@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.idea/
+.vscode/
+backend/src/generated/
+backend/uploads/*
+!backend/uploads/.gitkeep
+frontend/.vite/
+*.tsbuildinfo

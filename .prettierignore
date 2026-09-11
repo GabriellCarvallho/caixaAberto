@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+backend/src/generated
+backend/uploads
+package-lock.json

@@ -1,0 +1,30 @@
+name: Relato de erro
+description: Registre um comportamento incorreto ou regressão.
+title: 'bug: '
+labels: [bug]
+body:
+  - type: input
+    id: openproject
+    attributes:
+      label: Task do OpenProject
+      placeholder: '#31262'
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Comportamento observado
+      description: Informe o resultado atual e o resultado esperado.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Passos para reproduzir
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidências
+      description: Inclua logs sem dados pessoais, respostas ou capturas relevantes.

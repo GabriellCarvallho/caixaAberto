@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: caixa_aberto_test
+          POSTGRES_PASSWORD: caixa_aberto
+          POSTGRES_USER: caixa_aberto
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U caixa_aberto -d caixa_aberto_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CORS_ORIGIN: http://localhost:5173
+      DATABASE_URL: postgresql://caixa_aberto:caixa_aberto@localhost:5432/caixa_aberto_test?schema=public
+      DATABASE_URL_TEST: postgresql://caixa_aberto:caixa_aberto@localhost:5432/caixa_aberto_test?schema=public
+      JWT_SECRET: test-only-secret-with-at-least-32-characters
+      NODE_ENV: test
+      STORAGE_DRIVER: local
+      UPLOAD_DIR: uploads-test
+      UPLOAD_MAX_BYTES: 5242880
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Instalar dependências
+        run: npm ci
+      - name: Gerar Prisma Client
+        run: npm run prisma:generate -w backend
+      - name: Aplicar migrações em banco limpo
+        run: npm run prisma:migrate:deploy -w backend
+      - name: Lint
+        run: npm run lint
+      - name: Formato
+        run: npm run format:check
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Testes
+        run: npm test
