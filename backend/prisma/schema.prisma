@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           BigInt        @id @default(autoincrement())
+  name         String        @map("nome") @db.VarChar(150)
+  email        String        @unique(map: "USUARIO_email_key") @db.VarChar(150)
+  passwordHash String        @map("senha") @db.VarChar(255)
+  active       Boolean       @map("ativo")
+  createdAt    DateTime      @map("data_criacao") @db.Timestamp(6)
+  memberships  Membership[]
+  transactions Transaction[]
+
+  @@map("USUARIO")
+}
+
+model Organization {
+  id                 BigInt        @id @default(autoincrement())
+  name               String        @map("nome") @db.VarChar(150)
+  description        String        @map("descricao") @db.Text
+  managementStart    DateTime      @map("inicio_gestao") @db.Date
+  managementEnd      DateTime      @map("fim_gestao") @db.Date
+  publicLink         String?       @unique(map: "ORGANIZACAO_link_publico_key") @map("link_publico") @db.VarChar(255)
+  transparencyActive Boolean       @default(false) @map("transparencia_ativa")
+  memberships        Membership[]
+  categories         Category[]
+  transactions       Transaction[]
+  goals              Goal[]
+
+  @@map("ORGANIZACAO")
+}
+
+model Membership {
+  id             BigInt       @id @default(autoincrement())
+  userId         BigInt       @map("usuario_id")
+  organizationId BigInt       @map("organizacao_id")
+  role           String       @map("papel") @db.VarChar(20)
+  linkedAt       DateTime     @map("data_vinculo") @db.Date
+  active         Boolean      @map("ativo")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([userId, organizationId], map: "MEMBRO_usuario_id_organizacao_id_key")
+  @@index([organizationId], map: "MEMBRO_organizacao_id_idx")
+  @@map("MEMBRO")
+}
+
+model Category {
+  id             BigInt        @id @default(autoincrement())
+  organizationId BigInt        @map("organizacao_id")
+  name           String        @map("nome") @db.VarChar(100)
+  description    String        @map("descricao") @db.Text
+  type           String        @map("tipo") @db.VarChar(20)
+  active         Boolean       @map("ativa")
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  transactions   Transaction[]
+
+  @@unique([organizationId, name, type], map: "CATEGORIA_organizacao_id_nome_tipo_key")
+  @@map("CATEGORIA")
+}
+
+model Transaction {
+  id             BigInt       @id @default(autoincrement())
+  organizationId BigInt       @map("organizacao_id")
+  userId         BigInt       @map("usuario_id")
+  categoryId     BigInt       @map("categoria_id")
+  amount         Decimal      @map("valor") @db.Decimal(12, 2)
+  date           DateTime     @map("data") @db.Date
+  type           String       @map("tipo") @db.VarChar(20)
+  description    String       @map("descricao") @db.Text
+  source         String?      @map("origem") @db.VarChar(150)
+  recipient      String?      @map("destinatario") @db.VarChar(150)
+  status         String       @map("status") @db.VarChar(20)
+  createdAt      DateTime     @map("data_criacao") @db.Timestamp(6)
+  reversedAt     DateTime?    @map("data_estorno") @db.Timestamp(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  receipt        Receipt?
+
+  @@index([organizationId, date], map: "LANCAMENTO_organizacao_id_data_idx")
+  @@index([organizationId, categoryId], map: "LANCAMENTO_organizacao_id_categoria_id_idx")
+  @@index([organizationId, status], map: "LANCAMENTO_organizacao_id_status_idx")
+  @@index([userId], map: "LANCAMENTO_usuario_id_idx")
+  @@index([categoryId], map: "LANCAMENTO_categoria_id_idx")
+  @@map("LANCAMENTO")
+}
+
+model Receipt {
+  id            BigInt      @id @default(autoincrement())
+  transactionId BigInt      @unique(map: "COMPROVANTE_lancamento_id_key") @map("lancamento_id")
+  fileName      String      @map("nome_arquivo") @db.VarChar(255)
+  fileType      String      @map("tipo_arquivo") @db.VarChar(50)
+  size          BigInt      @map("tamanho")
+  fileUrl       String      @map("url_arquivo") @db.VarChar(500)
+  uploadedAt    DateTime    @map("data_upload") @db.Timestamp(6)
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("COMPROVANTE")
+}
+
+model Goal {
+  id             BigInt       @id @default(autoincrement())
+  organizationId BigInt       @map("organizacao_id")
+  description    String       @map("descricao") @db.VarChar(255)
+  targetAmount   Decimal      @map("valor_alvo") @db.Decimal(12, 2)
+  deadline       DateTime     @map("prazo") @db.Date
+  createdAt      DateTime     @map("data_criacao") @db.Timestamp(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([organizationId], map: "META_organizacao_id_idx")
+  @@map("META")
+}
