@@ -1,9 +1,13 @@
 import express from 'express';
+import 'dotenv/config';
 
 import { AppError } from './errors/app-error.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { requestLogger } from './middlewares/request-logger.js';
 import { testContextMiddleware } from './middlewares/test-context.js';
+
+import authRouter from './routers/authRouter.js'
+import userRouter from './routers/userRouter.js'
 
 export function createApp() {
   const app = express();
@@ -31,6 +35,9 @@ export function createApp() {
       });
     });
   }
+
+  app.use('/auth', authRouter)
+  app.use('/users', userRouter)
 
   app.use((_request, _response, next) => {
     next(new AppError(404, 'Rota não encontrada'));
