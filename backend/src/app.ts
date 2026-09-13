@@ -8,6 +8,8 @@ import { testContextMiddleware } from './middlewares/test-context.js';
 
 import authRouter from './routers/authRouter.js'
 import userRouter from './routers/userRouter.js'
+import transactionRouter from './routers/transactionRouter.js'
+import transparencyRouter from './routers/transparencyRouter.js'
 
 export function createApp() {
   const app = express();
@@ -38,6 +40,8 @@ export function createApp() {
 
   app.use('/auth', authRouter)
   app.use('/users', userRouter)
+  app.use('/transactions', transactionRouter)
+  app.use('/transparency', transparencyRouter)
 
   app.use((_request, _response, next) => {
     next(new AppError(404, 'Rota não encontrada'));
