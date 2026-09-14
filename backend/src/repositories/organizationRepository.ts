@@ -1,12 +1,12 @@
-import { createPrismaClient } from '../database/prisma.js'
+import { createPrismaClient } from '../database/prisma.js';
 
-const DATABASE_URL = process.env.DATABASE_URL
+const DATABASE_URL = process.env.DATABASE_URL;
 
-if(!DATABASE_URL) {
-    throw new Error('erro')
+if (!DATABASE_URL) {
+  throw new Error('erro');
 }
 
-const prisma = createPrismaClient(DATABASE_URL)
+const prisma = createPrismaClient(DATABASE_URL);
 
 export async function findByPublicLink(publicLink: string) {
   return prisma.organization.findFirst({
@@ -23,5 +23,5 @@ export async function findByPublicLink(publicLink: string) {
       transparencyActive: true,
       publicLink: true,
     },
-  })
+  });
 }
