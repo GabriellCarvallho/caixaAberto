@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 
+import type { User } from '../generated/prisma/client.js';
 import userRepository from '../repositories/userRepository.js';
 
-function serializeUser(user: any) {
+function serializeUser(user: User) {
   return {
     id: user.id.toString(),
     name: user.name,
@@ -13,7 +14,7 @@ function serializeUser(user: any) {
   };
 }
 
-async function getUsers(req: Request, res: Response) {
+async function getUsers(_req: Request, res: Response) {
   try {
     const users = await userRepository.findAll();
 

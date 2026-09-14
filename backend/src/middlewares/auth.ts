@@ -75,7 +75,7 @@ function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     req.user = decodeUser(token);
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({
       error: 'Token inválido ou expirado.',
     });
@@ -88,7 +88,7 @@ function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
  * Se existir um JWT válido, popula req.user.
  * Caso contrário, continua como anônimo.
  */
-function optionalAuth(req: AuthRequest, res: Response, next: NextFunction) {
+function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
   const token = extractToken(req);
 
   if (!token) {

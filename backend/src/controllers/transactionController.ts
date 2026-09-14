@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
+import type { AuthRequest } from '../middlewares/auth.js';
 import * as transactionRepository from '../repositories/transactionRepository.js';
 
 const TRANSACTION_TYPES = ['ENTRADA', 'SAIDA'] as const;
@@ -33,11 +34,11 @@ function parseMoney(value: unknown): Prisma.Decimal | null {
 }
 
 function getAuthenticatedUserId(req: Request): bigint | null {
-  const user = (req as any).user;
+  const user = (req as AuthRequest).user;
   return parseBigInt(user?.id);
 }
 
-function serialize(value: any): any {
+function serialize(value: unknown): unknown {
   return JSON.parse(
     JSON.stringify(value, (_key, item) => {
       if (typeof item === 'bigint') return item.toString();
@@ -216,7 +217,10 @@ function getMonthRange(month: string | undefined) {
   return { selected, start, end, previousStart, previousEnd };
 }
 
-function totalOf(groups: any[], type: TransactionType) {
+function totalOf(
+  groups: Awaited<ReturnType<typeof transactionRepository.getMonthlySummary>>,
+  type: TransactionType,
+) {
   const found = groups.find((item) => item.type === type);
   return new Prisma.Decimal(found?._sum?.amount ?? 0);
 }

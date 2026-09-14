@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 
+import type { User } from '../generated/prisma/client.js';
 import userRepository from '../repositories/userRepository.js';
 import { signUserToken } from '../utils/jwtUtils.js';
 
-function serializeUser(user: any) {
+function serializeUser(user: User) {
   return {
     id: user.id.toString(),
     name: user.name,
@@ -99,7 +100,7 @@ async function login(req: Request, res: Response) {
   }
 }
 
-async function logout(req: Request, res: Response) {
+async function logout(_req: Request, res: Response) {
   //essa função ainda não faz nada, somente volta uma mensagem de "logout realizado"
   return res.status(200).json({
     message: 'Logout realizado com sucesso',
