@@ -1,27 +1,19 @@
-import { Prisma } from '../generated/prisma/client.js'
-import { createPrismaClient } from '../database/prisma.js'
-
-const DATABASE_URL = process.env.DATABASE_URL
-
-if(!DATABASE_URL) {
-    throw new Error('URL do banco não foi passada')
-}
-
-const prisma = createPrismaClient(DATABASE_URL)
+import { prisma } from '../database/client.js';
+import { Prisma } from '../generated/prisma/client.js';
 
 export type CreateTransactionData = {
-  organizationId: bigint
-  userId: bigint
-  categoryId: bigint
-  amount: Prisma.Decimal
-  date: Date
-  type: string
-  description: string
-  source?: string | null
-  recipient?: string | null
-  status: string
-  createdAt: Date
-}
+  organizationId: bigint;
+  userId: bigint;
+  categoryId: bigint;
+  amount: Prisma.Decimal;
+  date: Date;
+  type: string;
+  description: string;
+  source?: string | null;
+  recipient?: string | null;
+  status: string;
+  createdAt: Date;
+};
 
 const transactionInclude = {
   category: {
@@ -48,13 +40,13 @@ const transactionInclude = {
       uploadedAt: true,
     },
   },
-} satisfies Prisma.TransactionInclude
+} satisfies Prisma.TransactionInclude;
 
 export async function createTransaction(data: CreateTransactionData) {
   return prisma.transaction.create({
     data,
     include: transactionInclude,
-  })
+  });
 }
 
 export async function getOrganizationById(id: bigint) {
@@ -68,7 +60,7 @@ export async function getOrganizationById(id: bigint) {
       managementStart: true,
       managementEnd: true,
     },
-  })
+  });
 }
 
 export async function getMembership(userId: bigint, organizationId: bigint) {
@@ -84,7 +76,7 @@ export async function getMembership(userId: bigint, organizationId: bigint) {
       role: true,
       active: true,
     },
-  })
+  });
 }
 
 export async function getCategoryForOrganization(
@@ -97,32 +89,24 @@ export async function getCategoryForOrganization(
       id: categoryId,
       organizationId,
       active: true,
-      OR: [
-        { type: transactionType },
-        { type: 'AMBOS' },
-        { type: 'TODOS' },
-      ],
+      OR: [{ type: transactionType }, { type: 'AMBOS' }, { type: 'TODOS' }],
     },
     select: {
       id: true,
       name: true,
       type: true,
     },
-  })
+  });
 }
 
 export async function findTransactionById(id: bigint, organizationId: bigint) {
   return prisma.transaction.findFirst({
     where: { id, organizationId },
     include: transactionInclude,
-  })
+  });
 }
 
-export async function getMonthlySummary(
-  organizationId: bigint,
-  start: Date,
-  end: Date,
-) {
+export async function getMonthlySummary(organizationId: bigint, start: Date, end: Date) {
   return prisma.transaction.groupBy({
     by: ['type'],
     where: {
@@ -133,7 +117,7 @@ export async function getMonthlySummary(
     },
     _sum: { amount: true },
     _count: { _all: true },
-  })
+  });
 }
 
 export async function getPublicOrganizationByLink(publicLink: string) {
@@ -151,14 +135,10 @@ export async function getPublicOrganizationByLink(publicLink: string) {
       publicLink: true,
       transparencyActive: true,
     },
-  })
+  });
 }
 
-export async function getPublicMonthlyAggregates(
-  organizationId: bigint,
-  start: Date,
-  end: Date,
-) {
+export async function getPublicMonthlyAggregates(organizationId: bigint, start: Date, end: Date) {
   return prisma.transaction.groupBy({
     by: ['type', 'categoryId'],
     where: {
@@ -169,11 +149,11 @@ export async function getPublicMonthlyAggregates(
     },
     _sum: { amount: true },
     _count: { _all: true },
-  })
+  });
 }
 
 export async function getCategoriesByIds(categoryIds: bigint[], organizationId: bigint) {
-  if (categoryIds.length === 0) return []
+  if (categoryIds.length === 0) return [];
 
   return prisma.category.findMany({
     where: {
@@ -185,5 +165,5 @@ export async function getCategoriesByIds(categoryIds: bigint[], organizationId: 
       name: true,
       type: true,
     },
-  })
+  });
 }

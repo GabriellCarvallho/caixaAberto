@@ -1,14 +1,14 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET não definido nas variáveis de ambiente')
+  throw new Error('JWT_SECRET não definido nas variáveis de ambiente');
 }
 
 interface UserForToken {
-  id: bigint
-  email: string
+  id: bigint;
+  email: string;
 }
 
 /**
@@ -19,11 +19,11 @@ interface UserForToken {
  * diretamente com BigInt.
  */
 function signUserToken(user: UserForToken): string {
-    if (!JWT_SECRET) {
-        throw new Error('JWT_SECRET não configurado');
-    }  
-  
-    return jwt.sign(
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET não configurado');
+  }
+
+  return jwt.sign(
     {
       email: user.email,
     },
@@ -31,10 +31,8 @@ function signUserToken(user: UserForToken): string {
     {
       subject: user.id.toString(),
       expiresIn: '1d',
-    }
-  )
+    },
+  );
 }
 
-export {
-  signUserToken,
-}
+export { signUserToken };

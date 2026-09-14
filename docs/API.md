@@ -1,11 +1,12 @@
-# Contrato da API — Sprint 1
+# Contrato da API: Sprint 1
 
-Base local: `http://localhost:3000`. Conteúdo JSON usa UTF-8. Datas usam `YYYY-MM-DD`; timestamps
-usam ISO 8601; dinheiro e IDs `BIGINT` são strings.
+Base local: `http://localhost:3000`. O conteúdo JSON usa UTF-8. Datas civis usam `YYYY-MM-DD`,
+timestamps usam ISO 8601 e valores monetários e IDs `BIGINT` são strings.
 
 ## Convenções comuns
 
-Rotas autenticadas recebem o contexto preenchido pelo middleware JWT do Murilo:
+As rotas e propriedades públicas da API usam português. Rotas autenticadas recebem o contexto
+resolvido pelo servidor a partir do JWT e do vínculo ativo em `MEMBRO`:
 
 ```ts
 req.contexto = {
@@ -15,14 +16,22 @@ req.contexto = {
 };
 ```
 
-Durante testes de integração, e somente com `NODE_ENV=test`, esse contexto pode ser injetado pelo
-cabeçalho `X-Test-Context`:
+Quando o usuário possui mais de um vínculo ativo, o cliente seleciona um deles pelo cabeçalho:
+
+```http
+X-Organization-Id: 2
+```
+
+Sem o cabeçalho, a API retorna `400`. Uma organização sem vínculo ativo com o usuário retorna `403`.
+O cliente não envia `organizacaoId` no corpo ou na query dos casos de uso autenticados.
+
+Durante testes de integração, e somente em `NODE_ENV=test`, o contexto pode ser injetado por:
 
 ```http
 X-Test-Context: {"usuarioId":"1","organizacaoId":"2","papel":"TESOUREIRO"}
 ```
 
-Erros seguem sempre:
+Erros seguem o formato:
 
 ```json
 {
@@ -33,26 +42,43 @@ Erros seguem sempre:
 }
 ```
 
-`campos` é opcional. Respostas nunca incluem stack trace. Recursos de outra organização são
-tratados como inexistentes (`404`) para não revelar sua presença.
+`campos` é opcional. Respostas não incluem stack trace. Recursos de outra organização são tratados
+como inexistentes (`404`) quando revelar sua presença constituiria vazamento de dados.
+
+## Compatibilidade temporária
+
+Alguns routers existentes ainda expõem caminhos e campos em inglês. Eles não alteram o contrato
+canônico definido neste documento e serão migrados em trabalho próprio:
+
+- `/users` ainda responde no lugar de `/usuarios`;
+- `/transactions` ainda responde no lugar de `/lancamentos`;
+- `/transactions/resumo/mensal` ainda responde no lugar de `/resumos/mensal`;
+- `/transparency/:publicLink` ainda responde no lugar de `/publico/{token}`;
+- essas rotas ainda recebem ou devolvem propriedades como `name`, `password`, `user`,
+  `organizationId`, `categoryId`, `amount`, `description`, `source` e `recipient`.
+
+Até a migração ser concluída, clientes que consumirem os caminhos temporários devem considerar que
+eles ainda não cumprem integralmente os formatos abaixo.
 
 ## Infraestrutura
 
-### `GET /health` — inicialização, Francisco
+### `GET /health`
 
 Não exige autenticação.
+
+Sucesso `200`:
 
 ```json
 { "status": "ok" }
 ```
 
-## Autenticação — Murilo, US01 (contrato provisório)
-
-As rotas abaixo são apenas contrato; não estão implementadas neste branch.
+## Autenticação
 
 ### `POST /auth/login`
 
-Entrada:
+Não exige autenticação.
+
+Request:
 
 ```json
 { "email": "tesoureiro@exemplo.com", "senha": "senha" }
@@ -63,24 +89,132 @@ Sucesso `200`:
 ```json
 {
   "token": "jwt",
-  "usuario": { "id": "1", "nome": "Ana", "email": "tesoureiro@exemplo.com" },
+  "usuario": {
+    "id": "1",
+    "nome": "Ana",
+    "email": "tesoureiro@exemplo.com",
+    "ativo": true
+  },
   "organizacoes": [{ "id": "2", "nome": "Comissão", "papel": "TESOUREIRO" }]
 }
 ```
 
-Credenciais inválidas retornam `401`. A seleção da organização no JWT deve ser alinhada com o
-contrato de `req.contexto` antes da implementação.
+Erros:
+
+- `400`: campos obrigatórios ausentes ou inválidos;
+- `401`: credenciais inválidas;
+- `403`: usuário inativo.
+
+Compatibilidade atual: o endpoint ainda espera `password` e devolve `user` com propriedades em
+inglês.
 
 ### `POST /auth/logout`
 
-Autenticada. Sucesso `204`. A estratégia de invalidação do JWT pertence à US01.
+Exige autenticação.
+
+Sucesso `204`, sem corpo.
+
+Erros:
+
+- `401`: token ausente, inválido ou expirado.
+
+Compatibilidade atual: o endpoint ainda aceita requisições sem autenticação e devolve `200` com a
+propriedade `message`.
+
+## Usuários
+
+### `GET /usuarios`
+
+Exige autenticação e papel `TESOUREIRO`.
+
+Sucesso `200`:
+
+```json
+{
+  "dados": [
+    {
+      "id": "1",
+      "nome": "Ana",
+      "email": "ana@exemplo.com",
+      "ativo": true,
+      "dataCriacao": "2026-09-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Erros:
+
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão.
+
+Compatibilidade atual: responde em `GET /users` e devolve um array com propriedades em inglês.
+
+### `GET /usuarios/{id}`
+
+Exige autenticação e papel `TESOUREIRO`.
+
+Sucesso `200` devolve o mesmo objeto de usuário da listagem.
+
+Erros:
+
+- `400`: ID inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `404`: usuário inexistente.
+
+Compatibilidade atual: responde em `GET /users/:id` com propriedades em inglês.
+
+### `POST /usuarios`
+
+Exige autenticação e papel `TESOUREIRO`.
+
+Request:
+
+```json
+{
+  "nome": "Ana",
+  "email": "ana@exemplo.com",
+  "senha": "senha-segura",
+  "ativo": true
+}
+```
+
+Sucesso `201` devolve o usuário criado sem o hash da senha.
+
+Erros:
+
+- `400`: dados inválidos ou e-mail já cadastrado;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão.
+
+Compatibilidade atual: `POST /users` usa propriedades em inglês. Também existe temporariamente
+`POST /auth/register`, sem autenticação; seu destino será definido em trabalho próprio.
+
+### `PUT /usuarios/{id}`
+
+Exige autenticação e papel `TESOUREIRO`. Aceita os mesmos campos de `POST /usuarios`, todos
+opcionais.
+
+Sucesso `200` devolve o usuário atualizado sem o hash da senha.
+
+Erros:
+
+- `400`: ID ou dados inválidos, ou e-mail já cadastrado;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `404`: usuário inexistente.
+
+Compatibilidade atual: responde em `PUT /users/:id` com request e response em inglês.
 
 ## Categorias
 
-### `GET /categorias` — Francisco, US17 #31262
+### `GET /categorias`
 
-Autenticada. Query opcional: `tipo=ENTRADA|SAIDA`. Retorna somente categorias ativas da organização
-do contexto, ordenadas por nome.
+Exige autenticação. Query opcional: `tipo=ENTRADA|SAIDA`. Retorna somente categorias ativas da
+organização do contexto, ordenadas por nome.
+
+Sucesso `200`:
 
 ```json
 {
@@ -88,15 +222,19 @@ do contexto, ordenadas por nome.
 }
 ```
 
-`tipo` inválido retorna `400`.
+Erros:
+
+- `400`: tipo inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
 ## Lançamentos
 
-### `POST /lancamentos` — Murilo, US18/US19 (contrato provisório)
+### `POST /lancamentos`
 
-Autenticada, somente `TESOUREIRO`. Não implementada neste branch.
+Exige autenticação e papel `TESOUREIRO`.
 
-Entrada:
+Request:
 
 ```json
 {
@@ -110,14 +248,25 @@ Entrada:
 }
 ```
 
-Para `SAIDA`, `destinatario` é preenchido e `origem` é nulo. Sucesso `201` retorna o lançamento.
-Categoria inexistente, inativa, de outro tipo ou de outra organização deve ser rejeitada sem revelar
-dados de terceiros.
+Para `SAIDA`, `destinatario` é preenchido e `origem` é nulo. Sucesso `201` devolve o lançamento.
 
-### `GET /lancamentos` — Francisco, US23 #31278
+Erros:
 
-Autenticada. Queries opcionais: `dataInicio`, `dataFim`, `tipo`, `categoriaId`, `usuarioId`, `page`
-(default `1`) e `pageSize` (default `20`, máximo `100`). Ordenação: `data DESC`, `id DESC`.
+- `400`: dados inválidos ou categoria inativa/incompatível;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão ou vínculo inativo;
+- `404`: categoria inexistente na organização do contexto.
+
+Compatibilidade atual: responde em `POST /transactions`, recebe campos em inglês e exige
+`organizationId` no corpo.
+
+### `GET /lancamentos`
+
+Exige autenticação. Queries opcionais: `dataInicio`, `dataFim`, `tipo`, `categoriaId`, `usuarioId`,
+`pagina` (padrão `1`) e `tamanhoPagina` (padrão `20`, máximo `100`). Ordenação: `data DESC`,
+`id DESC`.
+
+Sucesso `200`:
 
 ```json
 {
@@ -133,22 +282,54 @@ Autenticada. Queries opcionais: `dataInicio`, `dataFim`, `tipo`, `categoriaId`, 
       "possuiComprovante": true
     }
   ],
-  "paginacao": { "page": 1, "pageSize": 20, "total": 1, "totalPages": 1 }
+  "paginacao": { "pagina": 1, "tamanhoPagina": 20, "total": 1, "totalPaginas": 1 }
 }
 ```
 
-Se `dataFim < dataInicio`, retorna `400` com `erro: "Período inválido"`.
+Erros:
 
-### `GET /lancamentos/{id}` — Murilo, US24 (contrato provisório)
+- `400`: filtros ou período inválidos;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
-Autenticada. Retorna os dados completos do lançamento, responsável, categoria e metadados do
-comprovante. Lançamento ausente ou de outra organização retorna `404`.
+### `GET /lancamentos/{id}`
 
-### `POST /lancamentos/{id}/comprovante` — Francisco, US22 #31275
+Exige autenticação. Retorna os dados completos do lançamento, responsável, categoria e metadados
+do comprovante.
 
-Autenticada, somente `TESOUREIRO`. `multipart/form-data`, campo `arquivo`. Formatos aceitos por
-conteúdo real: JPEG, PNG, WebP e PDF; tamanho máximo configurado por `UPLOAD_MAX_BYTES` (5 MB por
-default).
+Sucesso `200`:
+
+```json
+{
+  "id": "30",
+  "data": "2026-09-02",
+  "tipo": "SAIDA",
+  "valor": "50.00",
+  "descricao": "Compra de material",
+  "origem": null,
+  "destinatario": "Papelaria Exemplo",
+  "status": "ATIVO",
+  "categoria": { "id": "10", "nome": "Material", "tipo": "SAIDA" },
+  "responsavel": { "id": "1", "nome": "Ana" },
+  "comprovante": null
+}
+```
+
+Erros:
+
+- `400`: ID inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo;
+- `404`: lançamento ausente ou pertencente a outra organização.
+
+Compatibilidade atual: responde em `GET /transactions/:id`, exige `organizationId` na query e
+devolve propriedades em inglês.
+
+### `POST /lancamentos/{id}/comprovante`
+
+Exige autenticação e papel `TESOUREIRO`. O conteúdo é `multipart/form-data`, no campo `arquivo`.
+São aceitos JPEG, PNG, WebP e PDF, verificados pelo conteúdo real, até o limite configurado em
+`UPLOAD_MAX_BYTES`.
 
 Sucesso `201`:
 
@@ -163,21 +344,32 @@ Sucesso `201`:
 }
 ```
 
-Formato ou tamanho inválido retorna `400` com
-`erro: "Envie uma imagem ou PDF de até 5 MB"`, sem persistir arquivo ou registro. Lançamento de
-outra organização retorna `404`.
+Erros:
 
-### `GET /lancamentos/{id}/comprovante` — Francisco, US22 #31275
+- `400`: formato ou tamanho inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `404`: lançamento ausente ou pertencente a outra organização.
 
-Autenticada. No driver local, devolve o conteúdo com `Content-Type` e `Content-Disposition` do
-arquivo. Um driver remoto poderá responder com redirecionamento para uma URL temporária. Ausente ou
-de outra organização retorna `404`.
+### `GET /lancamentos/{id}/comprovante`
+
+Exige autenticação. No armazenamento local, devolve o conteúdo com `Content-Type` e
+`Content-Disposition`. Um armazenamento remoto pode redirecionar para uma URL temporária.
+
+Erros:
+
+- `400`: ID inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo;
+- `404`: comprovante ou lançamento ausente na organização do contexto.
 
 ## Extrato e painéis
 
-### `GET /extrato` — Francisco, US28 #31284
+### `GET /extrato`
 
-Autenticada. `dataInicio` e `dataFim` são obrigatórios.
+Exige autenticação. `dataInicio` e `dataFim` são obrigatórios.
+
+Sucesso `200`:
 
 ```json
 {
@@ -200,12 +392,19 @@ Autenticada. `dataInicio` e `dataFim` são obrigatórios.
 }
 ```
 
-Linhas são ordenadas por `data ASC`, `id ASC`. Estornados aparecem, mas não alteram o saldo. Período
-inválido retorna `400`.
+Linhas são ordenadas por `data ASC`, `id ASC`. Estornados aparecem, mas não alteram o saldo.
 
-### `GET /relatorios/categorias` — Francisco, US30 #31291
+Erros:
 
-Autenticada. `dataInicio` e `dataFim` são obrigatórios. Ignora lançamentos estornados.
+- `400`: período ausente ou inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
+
+### `GET /relatorios/categorias`
+
+Exige autenticação. `dataInicio` e `dataFim` são obrigatórios. Lançamentos estornados são ignorados.
+
+Sucesso `200`:
 
 ```json
 {
@@ -216,27 +415,61 @@ Autenticada. `dataInicio` e `dataFim` são obrigatórios. Ignora lançamentos es
 }
 ```
 
-Se a data final anteceder a inicial, retorna `400` com `erro: "Período inválido"`.
+Erros:
 
-### `GET /resumos/mensal` — Murilo, US29 (contrato provisório)
+- `400`: período ausente ou inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
-Autenticada. Query obrigatória `mes=YYYY-MM`. Retorna saldo inicial, entradas, saídas e saldo final
-do mês, sempre isolados pela organização. Não implementada neste branch.
+### `GET /resumos/mensal`
+
+Exige autenticação. Query obrigatória: `mes=YYYY-MM`. Os valores são sempre isolados pela
+organização do contexto.
+
+Sucesso `200`:
+
+```json
+{
+  "mes": "2026-09",
+  "saldoInicial": "100.00",
+  "entradas": "500.00",
+  "saidas": "200.00",
+  "saldoFinal": "400.00"
+}
+```
+
+Erros:
+
+- `400`: mês ausente ou inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
+
+Compatibilidade atual: responde em `GET /transactions/resumo/mensal`, exige `organizationId` na
+query e devolve `month`, `entries`, `exits`, `balance` e `previousMonth`.
 
 ## Transparência pública
 
-### `POST /organizacoes/atual/link-publico` — Francisco, US33 #31298
+### `POST /organizacoes/atual/link-publico`
 
-Autenticada, somente `TESOUREIRO`. Gera ou regenera token aleatório de pelo menos 32 bytes e ativa a
-transparência.
+Exige autenticação e papel `TESOUREIRO`. Gera ou regenera token aleatório de pelo menos 32 bytes e
+ativa a transparência.
+
+Sucesso `200`:
 
 ```json
 { "token": "base64url-imprevisivel", "ativo": true }
 ```
 
-### `PATCH /organizacoes/atual/link-publico` — Francisco, US33 #31298
+Erros:
 
-Autenticada, somente `TESOUREIRO`.
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão.
+
+### `PATCH /organizacoes/atual/link-publico`
+
+Exige autenticação e papel `TESOUREIRO`.
+
+Request:
 
 ```json
 { "ativo": false }
@@ -248,22 +481,49 @@ Sucesso `200`:
 { "token": "base64url-imprevisivel", "ativo": false }
 ```
 
-Consultor recebe `403`. Ativação sem token previamente gerado retorna `409`.
+Erros:
 
-### `GET /publico/{token}` — Murilo, US32 (contrato provisório)
+- `400`: campo `ativo` inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `409`: tentativa de ativação sem token previamente gerado.
 
-Pública, sem autenticação. Usa `buscarOrganizacaoPorTokenAtivo(token)`. Token inexistente ou
-desativado retorna `404`. A resposta pode conter identificação da organização, saldos, totais e
-lançamentos permitidos, mas nunca nome, e-mail ou responsável por lançamento. O formato final deve
-ser fechado entre US32 e as telas públicas antes da implementação.
+### `GET /publico/{token}`
 
-## Responsabilidades de integração
+Pública, sem autenticação. Retorna identificação da organização, saldo atual, totais e extrato
+resumido permitido, sem dados pessoais ou identificação do responsável pelos lançamentos.
 
-| Área                                  | Responsável    | Observação                                             |
-| ------------------------------------- | -------------- | ------------------------------------------------------ |
-| JWT e preenchimento de `req.contexto` | Murilo         | Deve usar o contrato comum desta página                |
-| Escrita e detalhe de lançamento       | Murilo         | Deve respeitar os tipos e constraints do modelo        |
-| Armazenamento remoto                  | Gabriel        | Implementará novo driver de `StorageService` na Fase 2 |
-| Seed                                  | Gabriel        | Deve seguir defaults e unicidades de `DATA-MODEL.md`   |
-| Telas e componentes                   | Gabriel/Felipe | Fora deste branch                                      |
-| Testes de aceitação BDD com tela      | Gabriel/Felipe | Independentes dos testes de integração da API          |
+Query opcional: `mes=YYYY-MM`.
+
+Sucesso `200`:
+
+```json
+{
+  "organizacao": {
+    "nome": "Comissão de Formatura",
+    "descricao": "Prestação de contas da turma"
+  },
+  "saldoAtual": "400.00",
+  "periodo": { "mes": "2026-09" },
+  "totais": { "entradas": "500.00", "saidas": "200.00" },
+  "extrato": [
+    {
+      "id": "30",
+      "data": "2026-09-02",
+      "tipo": "SAIDA",
+      "valor": "50.00",
+      "descricao": "Compra de material",
+      "categoria": { "id": "10", "nome": "Material" }
+    }
+  ]
+}
+```
+
+Erros:
+
+- `400`: período ou filtros inválidos;
+- `404`: token inexistente ou transparência desativada.
+
+Compatibilidade atual: responde em `GET /transparency/:publicLink`, usa nomes em inglês e entrega
+somente agregados mensais por categoria; o saldo atual e o extrato resumido ainda não fazem parte da
+resposta temporária.

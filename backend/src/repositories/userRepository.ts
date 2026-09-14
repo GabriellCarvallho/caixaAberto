@@ -1,21 +1,11 @@
-import { PrismaClient } from '../generated/prisma/client.js'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool } from 'pg'
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-})
-
-const adapter = new PrismaPg(pool)
-
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../database/client.js';
 
 async function findAll() {
   return prisma.user.findMany({
     orderBy: {
       createdAt: 'desc',
     },
-  })
+  });
 }
 
 async function findById(id: bigint) {
@@ -23,7 +13,7 @@ async function findById(id: bigint) {
     where: {
       id,
     },
-  })
+  });
 }
 
 async function findByEmail(email: string) {
@@ -31,15 +21,15 @@ async function findByEmail(email: string) {
     where: {
       email,
     },
-  })
+  });
 }
 
 async function create(data: {
-  name: string
-  email: string
-  passwordHash: string
-  active?: boolean
-  createdAt?: Date
+  name: string;
+  email: string;
+  passwordHash: string;
+  active?: boolean;
+  createdAt?: Date;
 }) {
   return prisma.user.create({
     data: {
@@ -49,24 +39,24 @@ async function create(data: {
       active: data.active ?? true,
       createdAt: data.createdAt ?? new Date(),
     },
-  })
+  });
 }
 
 async function update(
   id: bigint,
   data: {
-    name?: string
-    email?: string
-    passwordHash?: string
-    active?: boolean
-  }
+    name?: string;
+    email?: string;
+    passwordHash?: string;
+    active?: boolean;
+  },
 ) {
   return prisma.user.update({
     where: {
       id,
     },
     data,
-  })
+  });
 }
 
 async function deleteById(id: bigint) {
@@ -74,7 +64,7 @@ async function deleteById(id: bigint) {
     where: {
       id,
     },
-  })
+  });
 }
 
 export default {
@@ -84,4 +74,4 @@ export default {
   create,
   update,
   deleteById,
-}
+};
