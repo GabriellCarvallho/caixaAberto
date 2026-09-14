@@ -2,12 +2,15 @@
 
 ## Fluxo de trabalho
 
-1. Atualize a `main` local sem reescrever o histórico remoto.
+1. Atualize a `main` local sem reescrever o histórico remoto. Nunca faça commit ou push direto
+   nela.
 2. Crie uma branch por task: `feature/USxx-descricao-curta` ou
    `feature/DEVOPSxx-descricao-curta`.
-3. Faça commits pequenos no padrão Conventional Commits, incluindo a história e o ID OpenProject.
+3. Faça commits pequenos no padrão Conventional Commits, incluindo o código e o ID numérico da
+   task no OpenProject, por exemplo `(US17 #31262)` ou `(DEVOPS02 #30558)`.
 4. Rode lint, verificação de formato, typecheck e testes.
-5. Abra pull request para `main`, preencha o template e solicite ao menos um revisor.
+5. Abra pull request para `main`, preencha o template e solicite revisão de outro integrante.
+6. Faça merge somente depois de uma aprovação e do job `quality` da CI concluir com sucesso.
 
 Exemplo:
 
@@ -44,3 +47,5 @@ git push -u origin feature/US17-get-categorias
 
 Todo PR deve referenciar a task do OpenProject, descrever como foi validado e indicar dependências de
 integração. Alterações de schema incluem uma migração nova e atualização de `docs/DATA-MODEL.md`.
+Pull requests entre branches de feature também executam a CI e devem ser revisados quando forem
+usados para integrar trabalho compartilhado.
