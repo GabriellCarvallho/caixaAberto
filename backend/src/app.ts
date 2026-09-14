@@ -1,10 +1,13 @@
+import type { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import express from 'express';
 import 'dotenv/config';
 
 import { readEnvironment } from './config/environment.js';
 import { AppError } from './errors/app-error.js';
+import { authenticate } from './middlewares/auth.js';
 import { errorHandler } from './middlewares/error-handler.js';
+import { loadContext, requireRole } from './middlewares/load-context.js';
 import { requestLogger } from './middlewares/request-logger.js';
 import { testContextMiddleware } from './middlewares/test-context.js';
 
@@ -12,6 +15,28 @@ import authRouter from './routers/authRouter.js';
 import userRouter from './routers/userRouter.js';
 import transactionRouter from './routers/transactionRouter.js';
 import transparencyRouter from './routers/transparencyRouter.js';
+
+function authenticateTestRequest(request: Request, response: Response, next: NextFunction) {
+  if (request.contexto) {
+    next();
+    return;
+  }
+
+  authenticate(request, response, next);
+}
+
+function respondWithContext(request: Request, response: Response, next: NextFunction) {
+  if (!request.contexto) {
+    next(new AppError(401, 'Contexto autenticado ausente'));
+    return;
+  }
+
+  response.json({
+    usuarioId: request.contexto.usuarioId.toString(),
+    organizacaoId: request.contexto.organizacaoId.toString(),
+    papel: request.contexto.papel,
+  });
+}
 
 export function createApp() {
   const environment = readEnvironment();
@@ -33,18 +58,14 @@ export function createApp() {
   });
 
   if (environment.NODE_ENV === 'test') {
-    app.get('/test/contexto', (request, response, next) => {
-      if (!request.contexto) {
-        next(new AppError(401, 'Contexto autenticado ausente'));
-        return;
-      }
-
-      response.json({
-        usuarioId: request.contexto.usuarioId.toString(),
-        organizacaoId: request.contexto.organizacaoId.toString(),
-        papel: request.contexto.papel,
-      });
-    });
+    app.get('/test/contexto', authenticateTestRequest, loadContext, respondWithContext);
+    app.get(
+      '/test/contexto/tesoureiro',
+      authenticateTestRequest,
+      loadContext,
+      requireRole('TESOUREIRO'),
+      respondWithContext,
+    );
   }
 
   app.use('/auth', authRouter);
