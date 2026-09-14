@@ -83,17 +83,35 @@ npm test
 ```
 
 Os testes de integração do backend usam Vitest e Supertest. Antes de executar a suíte, crie o
-ambiente local e suba o serviço de teste:
+ambiente local:
 
 ```bash
 cp backend/.env.example backend/.env
+```
+
+O caminho principal usa o serviço isolado do Docker Compose:
+
+```bash
 docker compose up -d postgres-test
+npm test
+```
+
+Como alternativa, use uma instalação local do PostgreSQL 16 configurada na porta `5433`. Ela deve
+ter o usuário `caixa_aberto`, senha `caixa_aberto` e banco `caixa_aberto_test`, correspondendo à
+`DATABASE_URL_TEST` de `.env.example`. Com o serviço local já iniciado e o usuário criado, o banco
+pode ser criado por:
+
+```bash
+createdb -h localhost -p 5433 -U caixa_aberto caixa_aberto_test
 npm test
 ```
 
 O setup copia `DATABASE_URL_TEST` para `DATABASE_URL` apenas no processo de teste. A suíte falha
 antes de executar migrações ou limpeza se a variável estiver ausente, for inválida ou se o nome do
 banco não identificar explicitamente um ambiente de teste.
+
+Pendência de integração: Gabriel, responsável por DevOps no time, deve validar o caminho principal
+com `docker compose up -d postgres-test` em um ambiente com Docker disponível.
 
 ## Fluxo de contribuição
 
