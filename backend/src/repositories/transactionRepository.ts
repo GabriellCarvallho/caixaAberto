@@ -1,13 +1,5 @@
+import { prisma } from '../database/client.js';
 import { Prisma } from '../generated/prisma/client.js';
-import { createPrismaClient } from '../database/prisma.js';
-
-const DATABASE_URL = process.env.DATABASE_URL;
-
-if (!DATABASE_URL) {
-  throw new Error('URL do banco não foi passada');
-}
-
-const prisma = createPrismaClient(DATABASE_URL);
 
 export type CreateTransactionData = {
   organizationId: bigint;
