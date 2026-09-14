@@ -19,7 +19,7 @@ pode ser executada do zero com `npm run prisma:migrate:deploy -w backend`.
 | Coluna         | Tipo           | Nulo | Default/constraint               |
 | -------------- | -------------- | ---- | -------------------------------- |
 | `id`           | `BIGINT`       | não  | identity, PK                     |
-| `nome`         | `VARCHAR(150)` | não  | —                                |
+| `nome`         | `VARCHAR(150)` | não  | nenhum                           |
 | `email`        | `VARCHAR(150)` | não  | único                            |
 | `senha`        | `VARCHAR(255)` | não  | hash produzido pela autenticação |
 | `ativo`        | `BOOLEAN`      | não  | sem default                      |
@@ -30,10 +30,10 @@ pode ser executada do zero com `npm run prisma:migrate:deploy -w backend`.
 | Coluna                | Tipo           | Nulo | Default/constraint      |
 | --------------------- | -------------- | ---- | ----------------------- |
 | `id`                  | `BIGINT`       | não  | identity, PK            |
-| `nome`                | `VARCHAR(150)` | não  | —                       |
-| `descricao`           | `TEXT`         | não  | —                       |
-| `inicio_gestao`       | `DATE`         | não  | —                       |
-| `fim_gestao`          | `DATE`         | não  | —                       |
+| `nome`                | `VARCHAR(150)` | não  | nenhum                  |
+| `descricao`           | `TEXT`         | não  | nenhum                  |
+| `inicio_gestao`       | `DATE`         | não  | nenhum                  |
+| `fim_gestao`          | `DATE`         | não  | nenhum                  |
 | `link_publico`        | `VARCHAR(255)` | sim  | único quando preenchido |
 | `transparencia_ativa` | `BOOLEAN`      | não  | `false`                 |
 
@@ -45,7 +45,7 @@ pode ser executada do zero com `npm run prisma:migrate:deploy -w backend`.
 | `usuario_id`     | `BIGINT`      | não  | FK `USUARIO.id`             |
 | `organizacao_id` | `BIGINT`      | não  | FK `ORGANIZACAO.id`         |
 | `papel`          | `VARCHAR(20)` | não  | `TESOUREIRO` ou `CONSULTOR` |
-| `data_vinculo`   | `DATE`        | não  | —                           |
+| `data_vinculo`   | `DATE`        | não  | nenhum                      |
 | `ativo`          | `BOOLEAN`     | não  | sem default                 |
 
 Unicidade: (`usuario_id`, `organizacao_id`). Índice adicional: `organizacao_id`.
@@ -56,8 +56,8 @@ Unicidade: (`usuario_id`, `organizacao_id`). Índice adicional: `organizacao_id`
 | ---------------- | -------------- | ---- | -------------------- |
 | `id`             | `BIGINT`       | não  | identity, PK         |
 | `organizacao_id` | `BIGINT`       | não  | FK `ORGANIZACAO.id`  |
-| `nome`           | `VARCHAR(100)` | não  | —                    |
-| `descricao`      | `TEXT`         | não  | —                    |
+| `nome`           | `VARCHAR(100)` | não  | nenhum               |
+| `descricao`      | `TEXT`         | não  | nenhum               |
 | `tipo`           | `VARCHAR(20)`  | não  | `ENTRADA` ou `SAIDA` |
 | `ativa`          | `BOOLEAN`      | não  | sem default          |
 
@@ -72,9 +72,9 @@ Unicidade: (`organizacao_id`, `nome`, `tipo`).
 | `usuario_id`     | `BIGINT`        | não  | FK `USUARIO.id`, responsável |
 | `categoria_id`   | `BIGINT`        | não  | FK `CATEGORIA.id`            |
 | `valor`          | `DECIMAL(12,2)` | não  | maior que zero               |
-| `data`           | `DATE`          | não  | —                            |
+| `data`           | `DATE`          | não  | nenhum                       |
 | `tipo`           | `VARCHAR(20)`   | não  | `ENTRADA` ou `SAIDA`         |
-| `descricao`      | `TEXT`          | não  | —                            |
+| `descricao`      | `TEXT`          | não  | nenhum                       |
 | `origem`         | `VARCHAR(150)`  | sim  | usado em entradas            |
 | `destinatario`   | `VARCHAR(150)`  | sim  | usado em saídas              |
 | `status`         | `VARCHAR(20)`   | não  | `ATIVO` ou `ESTORNADO`       |
@@ -95,10 +95,10 @@ Unicidade: (`organizacao_id`, `nome`, `tipo`).
 | --------------- | -------------- | ---- | ------------------------- |
 | `id`            | `BIGINT`       | não  | identity, PK              |
 | `lancamento_id` | `BIGINT`       | não  | FK `LANCAMENTO.id`, único |
-| `nome_arquivo`  | `VARCHAR(255)` | não  | —                         |
-| `tipo_arquivo`  | `VARCHAR(50)`  | não  | —                         |
+| `nome_arquivo`  | `VARCHAR(255)` | não  | nenhum                    |
+| `tipo_arquivo`  | `VARCHAR(50)`  | não  | nenhum                    |
 | `tamanho`       | `BIGINT`       | não  | bytes                     |
-| `url_arquivo`   | `VARCHAR(500)` | não  | —                         |
+| `url_arquivo`   | `VARCHAR(500)` | não  | nenhum                    |
 | `data_upload`   | `TIMESTAMP(6)` | não  | sem default               |
 
 ### `META`
@@ -107,9 +107,9 @@ Unicidade: (`organizacao_id`, `nome`, `tipo`).
 | ---------------- | --------------- | ---- | ------------------- |
 | `id`             | `BIGINT`        | não  | identity, PK        |
 | `organizacao_id` | `BIGINT`        | não  | FK `ORGANIZACAO.id` |
-| `descricao`      | `VARCHAR(255)`  | não  | —                   |
-| `valor_alvo`     | `DECIMAL(12,2)` | não  | —                   |
-| `prazo`          | `DATE`          | não  | —                   |
+| `descricao`      | `VARCHAR(255)`  | não  | nenhum              |
+| `valor_alvo`     | `DECIMAL(12,2)` | não  | nenhum              |
+| `prazo`          | `DATE`          | não  | nenhum              |
 | `data_criacao`   | `TIMESTAMP(6)`  | não  | sem default         |
 
 Índice: `organizacao_id`.

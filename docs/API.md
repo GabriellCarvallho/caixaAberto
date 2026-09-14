@@ -1,4 +1,4 @@
-# Contrato da API — Sprint 1
+# Contrato da API: Sprint 1
 
 Base local: `http://localhost:3000`. O conteúdo JSON usa UTF-8. Datas civis usam `YYYY-MM-DD`,
 timestamps usam ISO 8601 e valores monetários e IDs `BIGINT` são strings.
@@ -101,9 +101,9 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — campos obrigatórios ausentes ou inválidos;
-- `401` — credenciais inválidas;
-- `403` — usuário inativo.
+- `400`: campos obrigatórios ausentes ou inválidos;
+- `401`: credenciais inválidas;
+- `403`: usuário inativo.
 
 Compatibilidade atual: o endpoint ainda espera `password` e devolve `user` com propriedades em
 inglês.
@@ -116,7 +116,7 @@ Sucesso `204`, sem corpo.
 
 Erros:
 
-- `401` — token ausente, inválido ou expirado.
+- `401`: token ausente, inválido ou expirado.
 
 Compatibilidade atual: o endpoint ainda aceita requisições sem autenticação e devolve `200` com a
 propriedade `message`.
@@ -145,8 +145,8 @@ Sucesso `200`:
 
 Erros:
 
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão.
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão.
 
 Compatibilidade atual: responde em `GET /users` e devolve um array com propriedades em inglês.
 
@@ -158,10 +158,10 @@ Sucesso `200` devolve o mesmo objeto de usuário da listagem.
 
 Erros:
 
-- `400` — ID inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão;
-- `404` — usuário inexistente.
+- `400`: ID inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `404`: usuário inexistente.
 
 Compatibilidade atual: responde em `GET /users/:id` com propriedades em inglês.
 
@@ -184,9 +184,9 @@ Sucesso `201` devolve o usuário criado sem o hash da senha.
 
 Erros:
 
-- `400` — dados inválidos ou e-mail já cadastrado;
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão.
+- `400`: dados inválidos ou e-mail já cadastrado;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão.
 
 Compatibilidade atual: `POST /users` usa propriedades em inglês. Também existe temporariamente
 `POST /auth/register`, sem autenticação; seu destino será definido em trabalho próprio.
@@ -200,10 +200,10 @@ Sucesso `200` devolve o usuário atualizado sem o hash da senha.
 
 Erros:
 
-- `400` — ID ou dados inválidos, ou e-mail já cadastrado;
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão;
-- `404` — usuário inexistente.
+- `400`: ID ou dados inválidos, ou e-mail já cadastrado;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `404`: usuário inexistente.
 
 Compatibilidade atual: responde em `PUT /users/:id` com request e response em inglês.
 
@@ -224,9 +224,9 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — tipo inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo.
+- `400`: tipo inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
 ## Lançamentos
 
@@ -252,10 +252,10 @@ Para `SAIDA`, `destinatario` é preenchido e `origem` é nulo. Sucesso `201` dev
 
 Erros:
 
-- `400` — dados inválidos ou categoria inativa/incompatível;
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão ou vínculo inativo;
-- `404` — categoria inexistente na organização do contexto.
+- `400`: dados inválidos ou categoria inativa/incompatível;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão ou vínculo inativo;
+- `404`: categoria inexistente na organização do contexto.
 
 Compatibilidade atual: responde em `POST /transactions`, recebe campos em inglês e exige
 `organizationId` no corpo.
@@ -288,9 +288,9 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — filtros ou período inválidos;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo.
+- `400`: filtros ou período inválidos;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
 ### `GET /lancamentos/{id}`
 
@@ -317,10 +317,10 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — ID inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo;
-- `404` — lançamento ausente ou pertencente a outra organização.
+- `400`: ID inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo;
+- `404`: lançamento ausente ou pertencente a outra organização.
 
 Compatibilidade atual: responde em `GET /transactions/:id`, exige `organizationId` na query e
 devolve propriedades em inglês.
@@ -346,10 +346,10 @@ Sucesso `201`:
 
 Erros:
 
-- `400` — formato ou tamanho inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão;
-- `404` — lançamento ausente ou pertencente a outra organização.
+- `400`: formato ou tamanho inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `404`: lançamento ausente ou pertencente a outra organização.
 
 ### `GET /lancamentos/{id}/comprovante`
 
@@ -358,10 +358,10 @@ Exige autenticação. No armazenamento local, devolve o conteúdo com `Content-T
 
 Erros:
 
-- `400` — ID inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo;
-- `404` — comprovante ou lançamento ausente na organização do contexto.
+- `400`: ID inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo;
+- `404`: comprovante ou lançamento ausente na organização do contexto.
 
 ## Extrato e painéis
 
@@ -396,9 +396,9 @@ Linhas são ordenadas por `data ASC`, `id ASC`. Estornados aparecem, mas não al
 
 Erros:
 
-- `400` — período ausente ou inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo.
+- `400`: período ausente ou inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
 ### `GET /relatorios/categorias`
 
@@ -417,9 +417,9 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — período ausente ou inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo.
+- `400`: período ausente ou inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
 ### `GET /resumos/mensal`
 
@@ -440,9 +440,9 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — mês ausente ou inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — usuário sem vínculo ativo.
+- `400`: mês ausente ou inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: usuário sem vínculo ativo.
 
 Compatibilidade atual: responde em `GET /transactions/resumo/mensal`, exige `organizationId` na
 query e devolve `month`, `entries`, `exits`, `balance` e `previousMonth`.
@@ -462,8 +462,8 @@ Sucesso `200`:
 
 Erros:
 
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão.
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão.
 
 ### `PATCH /organizacoes/atual/link-publico`
 
@@ -483,10 +483,10 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — campo `ativo` inválido;
-- `401` — autenticação ausente ou inválida;
-- `403` — papel sem permissão;
-- `409` — tentativa de ativação sem token previamente gerado.
+- `400`: campo `ativo` inválido;
+- `401`: autenticação ausente ou inválida;
+- `403`: papel sem permissão;
+- `409`: tentativa de ativação sem token previamente gerado.
 
 ### `GET /publico/{token}`
 
@@ -521,8 +521,8 @@ Sucesso `200`:
 
 Erros:
 
-- `400` — período ou filtros inválidos;
-- `404` — token inexistente ou transparência desativada.
+- `400`: período ou filtros inválidos;
+- `404`: token inexistente ou transparência desativada.
 
 Compatibilidade atual: responde em `GET /transparency/:publicLink`, usa nomes em inglês e entrega
 somente agregados mensais por categoria; o saldo atual e o extrato resumido ainda não fazem parte da

@@ -3,7 +3,7 @@ import { publicTransparency } from '../controllers/transactionController.js';
 
 const router = Router();
 
-// US32 — consulta pública, sem authenticate
+// US32: consulta pública, sem authenticate
 // Ex.: GET /api/transparencia/minha-organizacao?mes=2026-09
 router.get('/:publicLink', publicTransparency);
 
