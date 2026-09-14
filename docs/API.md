@@ -486,7 +486,7 @@ Erros:
 - `400`: campo `ativo` inválido;
 - `401`: autenticação ausente ou inválida;
 - `403`: papel sem permissão;
-- `409`: tentativa de ativação sem token previamente gerado.
+- `409`: tentativa de ativação ou desativação sem token previamente gerado.
 
 ### `GET /publico/{token}`
 
