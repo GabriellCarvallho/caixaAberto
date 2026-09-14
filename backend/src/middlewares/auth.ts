@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
+import { AppError } from '../errors/app-error.js';
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
@@ -63,22 +65,19 @@ function decodeUser(token: string): AuthUser {
  *   email: string
  * }
  */
-function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+function authenticate(req: AuthRequest, _res: Response, next: NextFunction) {
   const token = extractToken(req);
 
   if (!token) {
-    return res.status(401).json({
-      error: 'Token de autenticação não fornecido.',
-    });
+    next(new AppError(401, 'Token de autenticação não fornecido.'));
+    return;
   }
 
   try {
     req.user = decodeUser(token);
     next();
   } catch {
-    return res.status(401).json({
-      error: 'Token inválido ou expirado.',
-    });
+    next(new AppError(401, 'Token inválido ou expirado.'));
   }
 }
 

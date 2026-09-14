@@ -46,4 +46,20 @@ describe('estrutura HTTP da API', () => {
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ erro: 'Contexto de teste inválido' });
   });
+
+  it('retorna erro de autenticação no contrato público da API', async () => {
+    const response = await request(createApp()).get('/users');
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({ erro: 'Token de autenticação não fornecido.' });
+  });
+
+  it('retorna token inválido no contrato público da API', async () => {
+    const response = await request(createApp())
+      .get('/users')
+      .set('Authorization', 'Bearer token-invalido');
+
+    expect(response.status).toBe(401);
+    expect(response.body).toEqual({ erro: 'Token inválido ou expirado.' });
+  });
 });
