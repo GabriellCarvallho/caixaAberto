@@ -159,7 +159,7 @@ describe('link público da organização', () => {
     expect(persistedOrganization.transparencyActive).toBe(true);
   });
 
-  it('rejeita ativo inválido com indicação do campo', async () => {
+  it('rejeita ativo de tipo errado com mensagem em português', async () => {
     const user = await createUser();
     const organization = await createOrganization({ publicLink: 'token-existente' });
     await createMembership({ userId: user.id, organizationId: organization.id });
@@ -172,11 +172,13 @@ describe('link público da organização', () => {
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
       erro: 'Dados inválidos',
-      campos: { ativo: expect.any(String) },
+      campos: {
+        ativo: 'Entrada inválida: esperava um valor booleano, recebeu um texto',
+      },
     });
   });
 
-  it('rejeita campos adicionais no body', async () => {
+  it('rejeita campo adicional no body com mensagem em português', async () => {
     const user = await createUser();
     const organization = await createOrganization({ publicLink: 'token-existente' });
     await createMembership({ userId: user.id, organizationId: organization.id });
@@ -189,7 +191,7 @@ describe('link público da organização', () => {
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
       erro: 'Dados inválidos',
-      campos: { requisicao: expect.any(String) },
+      campos: { requisicao: 'Chave inválida: "organizacaoId"' },
     });
   });
 

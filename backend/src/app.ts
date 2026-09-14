@@ -4,6 +4,7 @@ import express from 'express';
 import 'dotenv/config';
 
 import { readEnvironment } from './config/environment.js';
+import './config/zod.js';
 import { AppError } from './errors/app-error.js';
 import { authenticate } from './middlewares/auth.js';
 import { errorHandler } from './middlewares/error-handler.js';
