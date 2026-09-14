@@ -1,6 +1,8 @@
+import cors from 'cors';
 import express from 'express';
 import 'dotenv/config';
 
+import { readEnvironment } from './config/environment.js';
 import { AppError } from './errors/app-error.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { requestLogger } from './middlewares/request-logger.js';
@@ -12,9 +14,16 @@ import transactionRouter from './routers/transactionRouter.js';
 import transparencyRouter from './routers/transparencyRouter.js';
 
 export function createApp() {
+  const environment = readEnvironment();
   const app = express();
 
   app.disable('x-powered-by');
+  app.use(
+    cors({
+      origin: environment.CORS_ORIGIN,
+      credentials: false,
+    }),
+  );
   app.use(express.json());
   app.use(requestLogger);
   app.use(testContextMiddleware);
@@ -23,7 +32,7 @@ export function createApp() {
     response.status(200).json({ status: 'ok' });
   });
 
-  if (process.env.NODE_ENV === 'test') {
+  if (environment.NODE_ENV === 'test') {
     app.get('/test/contexto', (request, response, next) => {
       if (!request.contexto) {
         next(new AppError(401, 'Contexto autenticado ausente'));
