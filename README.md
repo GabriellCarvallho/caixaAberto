@@ -14,8 +14,10 @@ frontend/  esqueleto React + TypeScript criado com a estrutura do Vite
 docs/      decisões, modelo de dados e contrato da API
 ```
 
-Nesta etapa, o frontend não possui telas ou componentes de produto. Autenticação, escrita de
-lançamentos, seed, API pública e armazenamento remoto também pertencem a outras tasks.
+Nesta etapa, o frontend ainda é um esqueleto sem telas de produto. O backend já contém uma primeira
+implementação de autenticação, escrita de lançamentos, resumo mensal e transparência pública; os
+caminhos temporários em inglês serão migrados em tasks próprias para o contrato em português de
+[`docs/API.md`](docs/API.md).
 
 ## Requisitos
 
@@ -31,9 +33,11 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 npm install
 docker compose up -d postgres postgres-test
-npm run prisma:generate -w backend
 npm run prisma:migrate:deploy -w backend
 ```
+
+O `npm install` executa `prisma generate` automaticamente pelo `postinstall` do backend. Para gerar
+o client manualmente durante um diagnóstico, use `npm run prisma:generate -w backend`.
 
 Inicie os aplicativos em terminais separados:
 
@@ -58,7 +62,8 @@ Aplique migrações versionadas sem gerar arquivos novos:
 npm run prisma:migrate:deploy -w backend
 ```
 
-O banco de teste fica na porta `5433`. Para aplicar migrações nele:
+O banco de teste fica na porta `5433`. O harness aplica as migrações automaticamente antes da suíte
+e limpa as sete tabelas entre os testes. Para aplicar migrações nele manualmente:
 
 ```bash
 DATABASE_URL="postgresql://caixa_aberto:caixa_aberto@localhost:5433/caixa_aberto_test?schema=public" \
@@ -77,30 +82,24 @@ npm run typecheck
 npm test
 ```
 
-Os testes de integração do backend usam Vitest e Supertest. Casos que acessam dados usam o
-PostgreSQL de teste e devem definir `DATABASE_URL` a partir de `DATABASE_URL_TEST`.
+Os testes de integração do backend usam Vitest e Supertest. Antes de executar a suíte, crie o
+ambiente local e suba o serviço de teste:
+
+```bash
+cp backend/.env.example backend/.env
+docker compose up -d postgres-test
+npm test
+```
+
+O setup copia `DATABASE_URL_TEST` para `DATABASE_URL` apenas no processo de teste. A suíte falha
+antes de executar migrações ou limpeza se a variável estiver ausente, for inválida ou se o nome do
+banco não identificar explicitamente um ambiente de teste.
 
 ## Fluxo de contribuição
 
 O projeto usa Conventional Commits, uma branch por task e pull request obrigatório para `main` com
 um revisor. Consulte [`CONTRIBUTING.md`](CONTRIBUTING.md) antes de enviar mudanças.
 
-### Repositório GitHub e primeiro push
-
-O repositório remoto já existe. A partir de uma cópia local ainda sem remoto:
-
-```bash
-git init
-git remote add origin https://github.com/franciscovmn/caixaAberto.git
-git switch -c feature/DEVOPS03-modelo-dados
-git add .
-git commit -m "feat(database): inicializar modelo de dados (DEVOPS03 #31402)"
-git push -u origin feature/DEVOPS03-modelo-dados
-```
-
-Se fosse necessário criar novamente um repositório privado pelo GitHub CLI:
-
-```bash
-gh repo create franciscovmn/caixaAberto --private --source=. --remote=origin
-git push -u origin feature/DEVOPS03-modelo-dados
-```
+O branch padrão é `main` e recebe mudanças somente por pull request com uma aprovação e o job
+`quality` da CI verde. Crie cada branch a partir da `main` atualizada; os exemplos completos estão
+em [`CONTRIBUTING.md`](CONTRIBUTING.md).

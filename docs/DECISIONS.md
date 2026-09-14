@@ -72,3 +72,18 @@ registrada para permitir alinhamento antes das respectivas tasks.
 O contrato retorna `409` quando alguém tenta ativar a transparência antes de gerar o token. A
 alternativa de gerar um token implicitamente no `PATCH` duplicaria a responsabilidade do `POST` e
 tornaria a rotação acidental. Esta regra será confirmada na Fase 4 antes da implementação.
+
+## 2026-09-14 — Convenções públicas e contexto autenticado
+
+A equipe ratificou três convenções para a API:
+
+- rotas, propriedades públicas e mensagens usam português; identificadores internos do TypeScript
+  e do Prisma permanecem em inglês;
+- erros seguem `{ erro, campos? }` e passam pelo `AppError` e pelo `errorHandler` compartilhado;
+- organização e papel são resolvidos no servidor a partir do usuário autenticado e do vínculo ativo
+  em `MEMBRO`, formando `req.contexto`.
+
+Quando existir mais de um vínculo ativo, `X-Organization-Id` seleciona uma organização que pertença
+ao usuário. O identificador não é aceito livremente no corpo ou na query dos casos de uso
+autenticados. Os routers temporários em inglês permanecem disponíveis até uma migração específica,
+sem mudança de lógica neste ciclo de infraestrutura.
