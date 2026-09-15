@@ -10,6 +10,10 @@ export default defineConfig({
     fileParallelism: false,
     globalSetup: ['./tests/global-setup.ts'],
     maxWorkers: 1,
-    setupFiles: ['./tests/setup/environment.ts', './tests/setup/database.ts'],
+    setupFiles: [
+      './tests/setup/environment.ts',
+      './tests/setup/database.ts',
+      './tests/setup/uploads.ts',
+    ],
   },
 });

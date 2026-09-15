@@ -354,7 +354,8 @@ Erros:
 - `400`: formato ou tamanho inválido;
 - `401`: autenticação ausente ou inválida;
 - `403`: papel sem permissão;
-- `404`: lançamento ausente ou pertencente a outra organização.
+- `404`: lançamento ausente ou pertencente a outra organização;
+- `409`: lançamento já possui comprovante.
 
 ### `GET /lancamentos/{id}/comprovante`
 

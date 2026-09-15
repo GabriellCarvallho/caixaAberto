@@ -4,16 +4,12 @@ import { z } from 'zod';
 import { transactionTypes } from '../domain/transaction.js';
 import { getContexto } from '../middlewares/load-context.js';
 import { civilDateSchema } from '../schemas/civil-date.js';
+import { identifierSchema } from '../schemas/identifier.js';
 import * as transactionListService from '../services/transactionListService.js';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
-
-const identifierSchema = z
-  .string()
-  .regex(/^\d+$/, 'Informe um identificador numérico')
-  .transform(BigInt);
 
 const positiveIntegerSchema = z
   .string()

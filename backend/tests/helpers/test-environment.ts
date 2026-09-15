@@ -30,6 +30,12 @@ function parseTestDatabaseUrl(value: string): URL {
   return url;
 }
 
+const uploadDirectoryPath = fileURLToPath(new URL('../../uploads/test', import.meta.url));
+
+export function testUploadDirectory(): string {
+  return uploadDirectoryPath;
+}
+
 export function configureTestEnvironment(): string {
   config({ path: environmentPath });
 
@@ -46,6 +52,9 @@ export function configureTestEnvironment(): string {
 
   process.env.DATABASE_URL = testDatabaseUrl;
   process.env.NODE_ENV = 'test';
+  // Diretorio proprio para os arquivos criados pela suite, dentro de uploads/ e por isso ja
+  // coberto pelo .gitignore. A limpeza fica em tests/setup/uploads.ts.
+  process.env.UPLOAD_DIR = testUploadDirectory();
 
   return testDatabaseUrl;
 }
