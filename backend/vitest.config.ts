@@ -2,6 +2,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    // A coluna DATE volta do Prisma como meia-noite UTC, e a formatacao das datas depende disso.
+    // Sob UTC o comportamento correto e o incorreto seriam indistinguiveis, e uma regressao de fuso
+    // passaria despercebida, entao a suite roda sempre sob um fuso negativo, aqui e na CI.
+    env: { TZ: 'America/Fortaleza' },
     environment: 'node',
     fileParallelism: false,
     globalSetup: ['./tests/global-setup.ts'],

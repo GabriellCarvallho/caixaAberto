@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
 
 import { categoryTypes } from '../domain/category.js';
-import { AppError } from '../errors/app-error.js';
+import { getContexto } from '../middlewares/load-context.js';
 import * as categoryService from '../services/categoryService.js';
 
 const listCategoriesQuerySchema = z
@@ -10,14 +10,6 @@ const listCategoriesQuerySchema = z
     tipo: z.enum(categoryTypes).optional(),
   })
   .strict();
-
-function getOrganizationId(request: Request): bigint {
-  if (!request.contexto) {
-    throw new AppError(401, 'Contexto autenticado ausente');
-  }
-
-  return request.contexto.organizacaoId;
-}
 
 export async function listCategories(
   request: Request,
@@ -27,7 +19,7 @@ export async function listCategories(
   try {
     const query = listCategoriesQuerySchema.parse(request.query);
     const result = await categoryService.listActiveCategories(
-      getOrganizationId(request),
+      getContexto(request).organizacaoId,
       query.tipo,
     );
     response.status(200).json(result);

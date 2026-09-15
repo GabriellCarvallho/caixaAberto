@@ -63,3 +63,15 @@ describe('estrutura HTTP da API', () => {
     expect(response.body).toEqual({ erro: 'Token inválido ou expirado.' });
   });
 });
+
+describe('estrutura da suíte de testes', () => {
+  // O vitest.config.ts fixa TZ para que a suíte rode sob fuso negativo. Sob UTC, formatar uma data
+  // pelo horário local e formatar em UTC produzem o mesmo resultado, então uma regressão de fuso
+  // ficaria verde. Se o TZ deixar de ser aplicado, a proteção some em silêncio e só este teste avisa.
+  it('a suíte roda sob fuso negativo, senão regressões de data passam despercebidas', () => {
+    const meiaNoiteUtc = new Date('2026-09-02T00:00:00.000Z');
+
+    expect(meiaNoiteUtc.getTimezoneOffset()).toBeGreaterThan(0);
+    expect(meiaNoiteUtc.getDate()).not.toBe(meiaNoiteUtc.getUTCDate());
+  });
+});
