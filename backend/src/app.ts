@@ -13,6 +13,7 @@ import { requestLogger } from './middlewares/request-logger.js';
 import { testContextMiddleware } from './middlewares/test-context.js';
 
 import authRouter from './routers/authRouter.js';
+import categoryRouter from './routers/categoryRouter.js';
 import organizationRouter from './routers/organizationRouter.js';
 import userRouter from './routers/userRouter.js';
 import transactionRouter from './routers/transactionRouter.js';
@@ -73,6 +74,7 @@ export function createApp() {
   app.use('/auth', authRouter);
   app.use('/organizacoes', organizationRouter);
   app.use('/users', userRouter);
+  app.use('/categorias', categoryRouter);
   app.use('/transactions', transactionRouter);
   app.use('/transparency', transparencyRouter);
 
