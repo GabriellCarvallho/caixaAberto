@@ -1,10 +1,11 @@
 import { readdir } from 'node:fs/promises';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { createApp } from '../../src/app.js';
 import { readEnvironment } from '../../src/config/environment.js';
 import { prisma } from '../../src/database/client.js';
+import * as receiptRepository from '../../src/repositories/receiptRepository.js';
 import {
   createCategory,
   createMembership,
@@ -264,6 +265,35 @@ describe('comprovante de lançamento', () => {
     expect(persistido.fileName).toBe('original.pdf');
     expect(persistido.fileType).toBe('application/pdf');
     expect(await arquivosArmazenados()).toHaveLength(1);
+  });
+
+  it('remove o arquivo gravado quando a operação de banco não completa', async () => {
+    const { lancamento, authorization } = await criarCenario();
+
+    // A gravacao em disco nao participa da transacao do banco, entao existe uma janela real: o
+    // arquivo gravado e o commit falhando depois. E a unica forma de exercitar a compensacao, ja
+    // que a falha de commit nao tem como ser provocada pelo banco de teste.
+    const spy = vi
+      .spyOn(receiptRepository, 'createReceipt')
+      .mockImplementation(async (_data, beforeCommit) => {
+        await beforeCommit();
+
+        throw new Error('falha simulada depois da gravação do arquivo');
+      });
+
+    try {
+      const response = await request(createApp())
+        .post(`/lancamentos/${lancamento.id}/comprovante`)
+        .set('Authorization', authorization)
+        .attach('arquivo', PDF, { filename: 'nota.pdf' });
+
+      expect(response.status).toBe(500);
+      // Nem arquivo orfao em disco, nem linha orfa no banco.
+      expect(await arquivosArmazenados()).toEqual([]);
+      expect(await prisma.receipt.count()).toBe(0);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it('não deixa nome de arquivo do cliente escapar do diretório de upload', async () => {
