@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { NewOutflowPage } from './pages/NewOutflowPage';
+import { PublicTransparencyPage } from './pages/PublicTransparencyPage';
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
 import { TransactionsListPage } from './pages/TransactionsListPage';
 
@@ -11,6 +12,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/transparencia/:link" element={<PublicTransparencyPage />} />
 
       <Route element={<ProtectedRoute />}>
         <Route path="/lancamentos" element={<TransactionsListPage />} />
