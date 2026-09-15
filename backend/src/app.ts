@@ -15,6 +15,7 @@ import { testContextMiddleware } from './middlewares/test-context.js';
 import authRouter from './routers/authRouter.js';
 import categoryRouter from './routers/categoryRouter.js';
 import organizationRouter from './routers/organizationRouter.js';
+import reportRouter from './routers/reportRouter.js';
 import statementRouter from './routers/statementRouter.js';
 import userRouter from './routers/userRouter.js';
 import transactionListRouter from './routers/transactionListRouter.js';
@@ -79,6 +80,7 @@ export function createApp() {
   app.use('/categorias', categoryRouter);
   app.use('/lancamentos', transactionListRouter);
   app.use('/extrato', statementRouter);
+  app.use('/relatorios', reportRouter);
   app.use('/transactions', transactionRouter);
   app.use('/transparency', transparencyRouter);
 
