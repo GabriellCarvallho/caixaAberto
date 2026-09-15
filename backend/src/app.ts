@@ -16,6 +16,7 @@ import authRouter from './routers/authRouter.js';
 import categoryRouter from './routers/categoryRouter.js';
 import organizationRouter from './routers/organizationRouter.js';
 import userRouter from './routers/userRouter.js';
+import transactionListRouter from './routers/transactionListRouter.js';
 import transactionRouter from './routers/transactionRouter.js';
 import transparencyRouter from './routers/transparencyRouter.js';
 
@@ -75,6 +76,7 @@ export function createApp() {
   app.use('/organizacoes', organizationRouter);
   app.use('/users', userRouter);
   app.use('/categorias', categoryRouter);
+  app.use('/lancamentos', transactionListRouter);
   app.use('/transactions', transactionRouter);
   app.use('/transparency', transparencyRouter);
 
