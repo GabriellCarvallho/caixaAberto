@@ -1,13 +1,11 @@
 import { formatCivilDate } from '../domain/civil-date.js';
-import { affectsBalance, transactionTypes } from '../domain/transaction.js';
+import { affectsBalance, EXPENSE_TYPE, INCOME_TYPE } from '../domain/transaction.js';
 import { Prisma } from '../generated/prisma/client.js';
 import * as statementRepository from '../repositories/statementRepository.js';
 import type {
   StatementLineRecord,
   StatementTotalByType,
 } from '../repositories/statementRepository.js';
-
-const [INCOME_TYPE] = transactionTypes;
 
 export interface StatementLine {
   id: string;
@@ -28,8 +26,24 @@ export interface StatementResponse {
   saldoFinal: string;
 }
 
-function applyToBalance(balance: Prisma.Decimal, type: string, amount: Prisma.Decimal) {
-  return type === INCOME_TYPE ? balance.plus(amount) : balance.minus(amount);
+// Cada tipo e tratado explicitamente. Um `else` generico faria um terceiro tipo virar saida em
+// silencio, produzindo saldo errado sem erro nenhum; aqui ele interrompe o calculo. Hoje o CHECK do
+// banco limita a coluna a ENTRADA e SAIDA, entao este caminho e inalcancavel, e a guarda existe
+// para o dia em que essa restricao mudar.
+function applyToBalance(
+  balance: Prisma.Decimal,
+  type: string,
+  amount: Prisma.Decimal,
+): Prisma.Decimal {
+  if (type === INCOME_TYPE) {
+    return balance.plus(amount);
+  }
+
+  if (type === EXPENSE_TYPE) {
+    return balance.minus(amount);
+  }
+
+  throw new Error(`Tipo de lancamento desconhecido no calculo de saldo: ${type}`);
 }
 
 // Nao existe saldo inicial armazenado: o saldo anterior e sempre derivado do historico.
@@ -69,17 +83,21 @@ export async function getStatement(
 
   const previousBalance = calculatePreviousBalance(previousTotals);
 
-  // O acumulado usa Decimal, e nao number, para que somas de centavos nao acumulem erro binario.
-  // A linha estornada repete o acumulado da anterior, porque nao altera o saldo.
+  // O acumulado usa Decimal porque e o tipo que o Prisma devolve: converter para number seria perda
+  // gratuita. Nas magnitudes permitidas por DECIMAL(12,2) a diferenca nao seria observavel depois do
+  // toFixed(2), entao isso e fidelidade ao tipo de origem, e nao protecao contra erro binario.
+  // Cada linha depende do acumulado da anterior, e o for...of deixa essa ordem explicita. A linha
+  // estornada nao avanca o acumulado, entao repete o valor da anterior.
   let accumulated = previousBalance;
+  const statementLines: StatementLine[] = [];
 
-  const statementLines = lines.map((record) => {
+  for (const record of lines) {
     if (affectsBalance(record.status)) {
       accumulated = applyToBalance(accumulated, record.type, record.amount);
     }
 
-    return toLine(record, accumulated);
-  });
+    statementLines.push(toLine(record, accumulated));
+  }
 
   // Sem linhas no periodo, o acumulado nunca avancou e o saldo final e o proprio saldo anterior.
   return {
