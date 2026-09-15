@@ -4,8 +4,11 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { NewOutflowPage } from './pages/NewOutflowPage';
+<<<<<<< HEAD
 import { PublicTransparencyPage } from './pages/PublicTransparencyPage';
 import { StatementPage } from './pages/StatementPage';
+=======
+>>>>>>> 9d844d8 (feat(lancamentos): visualizar detalhes do lancamento (US24 #30477))
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
 import { TransactionsListPage } from './pages/TransactionsListPage';
 
@@ -19,8 +22,11 @@ export function App() {
         <Route path="/lancamentos" element={<TransactionsListPage />} />
         <Route path="/lancamentos/saida" element={<NewOutflowPage />} />
         <Route path="/lancamentos/:id" element={<TransactionDetailPage />} />
+<<<<<<< HEAD
         <Route path="/resumo" element={<MonthlySummaryPage />} />
         <Route path="/extrato" element={<StatementPage />} />
+=======
+>>>>>>> 9d844d8 (feat(lancamentos): visualizar detalhes do lancamento (US24 #30477))
       </Route>
 
       <Route path="/" element={<Navigate to="/lancamentos" replace />} />
