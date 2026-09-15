@@ -30,6 +30,12 @@ interface TransactionDetail {
 const RECIPIENT_LABEL = 'Destinatário';
 const SOURCE_LABEL = 'Origem';
 
+
+function formatarData(dataISO: string): string {
+  const data = new Date(dataISO);
+  return data.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+}
+
 export function TransactionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [lancamento, setLancamento] = useState<TransactionDetail | null>(null);
@@ -97,7 +103,7 @@ export function TransactionDetailPage() {
 
       <dl>
         <dt>Data</dt>
-        <dd>{lancamento.date}</dd>
+        <dd>{formatarData(lancamento.date)}</dd>
 
         <dt>Tipo</dt>
         <dd>{lancamento.type}</dd>
