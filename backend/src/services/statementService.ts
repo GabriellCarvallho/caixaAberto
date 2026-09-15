@@ -1,7 +1,13 @@
 import { formatCivilDate } from '../domain/civil-date.js';
-import { affectsBalance, EXPENSE_TYPE, INCOME_TYPE } from '../domain/transaction.js';
+import {
+  affectsBalance,
+  assertKnownTransactionType,
+  EXPENSE_TYPE,
+  INCOME_TYPE,
+} from '../domain/transaction.js';
 import { Prisma } from '../generated/prisma/client.js';
 import * as statementRepository from '../repositories/statementRepository.js';
+import { assertNever } from '../utils/assert-never.js';
 import type {
   StatementLineRecord,
   StatementTotalByType,
@@ -26,24 +32,24 @@ export interface StatementResponse {
   saldoFinal: string;
 }
 
-// Cada tipo e tratado explicitamente. Um `else` generico faria um terceiro tipo virar saida em
-// silencio, produzindo saldo errado sem erro nenhum; aqui ele interrompe o calculo. Hoje o CHECK do
-// banco limita a coluna a ENTRADA e SAIDA, entao este caminho e inalcancavel, e a guarda existe
-// para o dia em que essa restricao mudar.
+// Switch exaustivo em vez de `else` generico: um terceiro tipo acrescentado ao dominio quebra a
+// compilacao aqui, no assertNever, em vez de virar saida em silencio e produzir saldo errado sem
+// erro nenhum. Um tipo fora da uniao, vindo do banco, e barrado antes, no assertKnownTransactionType.
 function applyToBalance(
   balance: Prisma.Decimal,
   type: string,
   amount: Prisma.Decimal,
 ): Prisma.Decimal {
-  if (type === INCOME_TYPE) {
-    return balance.plus(amount);
-  }
+  const knownType = assertKnownTransactionType(type);
 
-  if (type === EXPENSE_TYPE) {
-    return balance.minus(amount);
+  switch (knownType) {
+    case INCOME_TYPE:
+      return balance.plus(amount);
+    case EXPENSE_TYPE:
+      return balance.minus(amount);
+    default:
+      return assertNever(knownType);
   }
-
-  throw new Error(`Tipo de lancamento desconhecido no calculo de saldo: ${type}`);
 }
 
 // Nao existe saldo inicial armazenado: o saldo anterior e sempre derivado do historico.
