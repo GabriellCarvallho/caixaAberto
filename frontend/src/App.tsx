@@ -23,10 +23,14 @@ export function App() {
         <Route path="/lancamentos/saida" element={<NewOutflowPage />} />
         <Route path="/lancamentos/:id" element={<TransactionDetailPage />} />
 <<<<<<< HEAD
+<<<<<<< HEAD
         <Route path="/resumo" element={<MonthlySummaryPage />} />
         <Route path="/extrato" element={<StatementPage />} />
 =======
 >>>>>>> 9d844d8 (feat(lancamentos): visualizar detalhes do lancamento (US24 #30477))
+=======
+        <Route path="/resumo" element={<MonthlySummaryPage />} />
+>>>>>>> 5b88773 (feat(lancamentos): consultar resumo financeiro mensal (US29 #30519))
       </Route>
 
       <Route path="/" element={<Navigate to="/lancamentos" replace />} />
