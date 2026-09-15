@@ -1,5 +1,10 @@
 import { formatCivilDate } from '../domain/civil-date.js';
-import { assertKnownTransactionType, EXPENSE_TYPE, INCOME_TYPE } from '../domain/transaction.js';
+import {
+  assertKnownTransactionType,
+  EXPENSE_TYPE,
+  INCOME_TYPE,
+  type TransactionType,
+} from '../domain/transaction.js';
 import { Prisma } from '../generated/prisma/client.js';
 import * as categoryReportRepository from '../repositories/categoryReportRepository.js';
 import { assertNever } from '../utils/assert-never.js';
@@ -28,12 +33,25 @@ interface AggregatedCategory {
   total: Prisma.Decimal;
 }
 
-// Ordem de leitura: tipo separa os dois blocos, espelhando o objeto totais; dentro do bloco o maior
-// total vem primeiro, que e a pergunta do relatorio; o nome desempata para a ordem ser
-// deterministica e a tela nao trocar linhas de lugar entre dois carregamentos iguais.
+// Entradas antes de saidas, para o relatorio ser lido na ordem em que o dinheiro se move: o que
+// entrou e depois o que saiu. A ordem vem deste rank nomeado, e nao da comparacao alfabetica dos
+// rotulos, que poria ENTRADA na frente por acidente e faria renomear um rotulo reordenar a tela.
+// Sendo um Record da uniao, acrescentar um tipo ao dominio quebra a compilacao aqui.
+const READING_RANK: Record<TransactionType, number> = {
+  [INCOME_TYPE]: 0,
+  [EXPENSE_TYPE]: 1,
+};
+
+// Tipo separa os dois blocos, espelhando o objeto totais; dentro do bloco o maior total vem
+// primeiro, que e a pergunta do relatorio; o nome desempata para a ordem ser deterministica e a tela
+// nao trocar linhas de lugar entre dois carregamentos iguais.
 function compareForReading(first: AggregatedCategory, second: AggregatedCategory): number {
-  if (first.type !== second.type) {
-    return first.type < second.type ? -1 : 1;
+  const byType =
+    READING_RANK[assertKnownTransactionType(first.type)] -
+    READING_RANK[assertKnownTransactionType(second.type)];
+
+  if (byType !== 0) {
+    return byType;
   }
 
   const byTotal = second.total.comparedTo(first.total);
