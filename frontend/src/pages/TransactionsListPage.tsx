@@ -57,24 +57,30 @@ export function TransactionsListPage() {
 
   useEffect(() => {
     let cancelado = false;
-    setCarregando(true);
-    setErro(null);
 
-    apiRequest<TransactionListResponse>(`/lancamentos?${montarQueryString(filtros, pagina)}`)
-      .then((dados) => {
-        if (!cancelado) setResultado(dados);
-      })
-      .catch((error) => {
-        if (cancelado) return;
-        setErro(
-          error instanceof ApiError
-            ? error.message
-            : 'Não foi possível carregar os lançamentos',
+    async function carregar() {
+      setCarregando(true);
+      setErro(null);
+
+      try {
+        const dados = await apiRequest<TransactionListResponse>(
+          `/lancamentos?${montarQueryString(filtros, pagina)}`,
         );
-      })
-      .finally(() => {
+        if (!cancelado) setResultado(dados);
+      } catch (error) {
+        if (!cancelado) {
+          setErro(
+            error instanceof ApiError
+              ? error.message
+              : 'Não foi possível carregar os lançamentos',
+          );
+        }
+      } finally {
         if (!cancelado) setCarregando(false);
-      });
+      }
+    }
+
+    void carregar();
 
     return () => {
       cancelado = true;
