@@ -5,10 +5,14 @@ import { LoginPage } from './pages/LoginPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { NewOutflowPage } from './pages/NewOutflowPage';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { PublicTransparencyPage } from './pages/PublicTransparencyPage';
 import { StatementPage } from './pages/StatementPage';
 =======
 >>>>>>> 9d844d8 (feat(lancamentos): visualizar detalhes do lancamento (US24 #30477))
+=======
+import { PublicTransparencyPage } from './pages/PublicTransparencyPage';
+>>>>>>> 24111c2 (feat(transparencia): consultar transparencia publica sem autenticacao (US32 #30524))
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
 import { TransactionsListPage } from './pages/TransactionsListPage';
 
