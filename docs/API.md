@@ -25,6 +25,9 @@ X-Organization-Id: 2
 Sem o cabeçalho, a API retorna `400`. Uma organização sem vínculo ativo com o usuário retorna `403`.
 O cliente não envia `organizacaoId` no corpo ou na query dos casos de uso autenticados.
 
+Parâmetros de query e propriedades de corpo não reconhecidos são rejeitados com `400`, em vez
+de serem ignorados em silêncio.
+
 Durante testes de integração, e somente em `NODE_ENV=test`, o contexto pode ser injetado por:
 
 ```http
