@@ -1,7 +1,7 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
 import { prisma } from '../database/client.js';
-import { roles, type Role } from '../domain/auth-context.js';
+import { roles, type AuthContext, type Role } from '../domain/auth-context.js';
 import { AppError } from '../errors/app-error.js';
 import type { AuthRequest } from './auth.js';
 
@@ -104,6 +104,14 @@ export async function loadContext(
   } catch (error) {
     next(error);
   }
+}
+
+export function getContexto(request: Request): AuthContext {
+  if (!request.contexto) {
+    throw new AppError(401, 'Contexto autenticado ausente');
+  }
+
+  return request.contexto;
 }
 
 export function requireRole(role: Role): RequestHandler {
