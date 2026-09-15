@@ -3,29 +3,12 @@ import { z } from 'zod';
 
 import { transactionTypes } from '../domain/transaction.js';
 import { getContexto } from '../middlewares/load-context.js';
+import { civilDateSchema } from '../schemas/civil-date.js';
 import * as transactionListService from '../services/transactionListService.js';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
-
-function toUtcDate(value: string): Date {
-  return new Date(`${value}T00:00:00.000Z`);
-}
-
-// Rejeita datas que casam com o formato mas nao existem, como 2026-09-31, que o Date
-// normalizaria silenciosamente para o mes seguinte.
-function isExistingCivilDate(value: string): boolean {
-  const date = toUtcDate(value);
-
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
-}
-
-const civilDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Informe uma data no formato AAAA-MM-DD')
-  .refine(isExistingCivilDate, 'Informe uma data existente')
-  .transform(toUtcDate);
 
 const identifierSchema = z
   .string()

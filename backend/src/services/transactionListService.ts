@@ -1,3 +1,4 @@
+import { formatCivilDate } from '../domain/civil-date.js';
 import type { TransactionType } from '../domain/transaction.js';
 import * as transactionListRepository from '../repositories/transactionListRepository.js';
 import type { TransactionListRecord } from '../repositories/transactionListRepository.js';
@@ -31,10 +32,6 @@ export interface TransactionListResponse {
     total: number;
     totalPaginas: number;
   };
-}
-
-function formatCivilDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
 }
 
 function toListItem(record: TransactionListRecord): TransactionListItem {
