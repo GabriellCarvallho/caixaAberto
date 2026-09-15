@@ -420,6 +420,10 @@ Sucesso `200`:
 }
 ```
 
+A lista traz apenas as categorias com lançamentos ativos no período, ordenadas por tipo, depois por
+total decrescente e, no empate, por nome. Uma categoria desativada aparece se teve movimentação no
+período.
+
 Erros:
 
 - `400`: período ausente ou inválido;
