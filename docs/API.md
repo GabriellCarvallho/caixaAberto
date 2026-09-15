@@ -289,6 +289,8 @@ Sucesso `200`:
 }
 ```
 
+Um resultado vazio devolve `total` e `totalPaginas` iguais a zero.
+
 Erros:
 
 - `400`: filtros ou período inválidos;
