@@ -2,6 +2,7 @@ import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
 import { createApp } from '../../src/app.js';
+import { Prisma } from '../../src/generated/prisma/client.js';
 import {
   createCategory,
   createMembership,
@@ -494,5 +495,121 @@ describe('relatório por categoria', () => {
     expect(response.status).toBe(200);
     expect(response.body.categorias).toHaveLength(1);
     expect(response.body.totais).toEqual({ entradas: '90.00', saidas: '0.00' });
+  });
+});
+
+describe('consistência entre o extrato e o relatório por categoria', () => {
+  // Os dois endpoints calculam a mesma grandeza por caminhos diferentes: o extrato agrega o saldo
+  // anterior e percorre as linhas no servico, o relatorio agrega por categoria no banco. Eles
+  // compartilham o criterio de estorno e o schema de periodo, mas cada repositorio escreve o
+  // proprio where. Este teste prende a relacao entre os dois, que nenhuma das duas suites observa
+  // sozinha: cada uma pode estar certa pelas proprias regras e discordar da outra.
+  it('a variação do saldo no extrato é igual a entradas menos saídas no relatório', async () => {
+    const { authorization, base, organization } = await criarCenarioBase();
+    const mensalidades = await createCategory({
+      organizationId: organization.id,
+      name: 'Mensalidades',
+      type: 'ENTRADA',
+    });
+    const doacoes = await createCategory({
+      organizationId: organization.id,
+      name: 'Doações',
+      type: 'ENTRADA',
+    });
+    const material = await createCategory({
+      organizationId: organization.id,
+      name: 'Material',
+      type: 'SAIDA',
+    });
+
+    // Antes do periodo, para que o saldo anterior nao seja zero.
+    await createTransaction({
+      ...base,
+      categoryId: mensalidades.id,
+      type: 'ENTRADA',
+      amount: '500.00',
+      date: new Date('2026-08-10T00:00:00.000Z'),
+    });
+    await createTransaction({
+      ...base,
+      categoryId: material.id,
+      type: 'SAIDA',
+      amount: '200.00',
+      date: new Date('2026-08-20T00:00:00.000Z'),
+    });
+    await createTransaction({
+      ...base,
+      categoryId: material.id,
+      type: 'SAIDA',
+      amount: '999.00',
+      date: new Date('2026-08-25T00:00:00.000Z'),
+      status: 'ESTORNADO',
+      reversedAt: new Date('2026-08-26T10:00:00.000Z'),
+    });
+
+    // No periodo, incluindo as duas pontas e um estornado.
+    await createTransaction({
+      ...base,
+      categoryId: mensalidades.id,
+      type: 'ENTRADA',
+      amount: '100.00',
+      date: new Date('2026-09-01T00:00:00.000Z'),
+    });
+    await createTransaction({
+      ...base,
+      categoryId: doacoes.id,
+      type: 'ENTRADA',
+      amount: '50.00',
+      date: new Date('2026-09-15T00:00:00.000Z'),
+    });
+    await createTransaction({
+      ...base,
+      categoryId: material.id,
+      type: 'SAIDA',
+      amount: '20.00',
+      date: new Date('2026-09-10T00:00:00.000Z'),
+    });
+    await createTransaction({
+      ...base,
+      categoryId: material.id,
+      type: 'SAIDA',
+      amount: '777.00',
+      date: new Date('2026-09-12T00:00:00.000Z'),
+      status: 'ESTORNADO',
+      reversedAt: new Date('2026-09-13T10:00:00.000Z'),
+    });
+    await createTransaction({
+      ...base,
+      categoryId: material.id,
+      type: 'SAIDA',
+      amount: '30.00',
+      date: new Date('2026-09-30T00:00:00.000Z'),
+    });
+
+    const [extrato, relatorio] = await Promise.all([
+      request(createApp()).get('/extrato').query(PERIODO).set('Authorization', authorization),
+      request(createApp())
+        .get('/relatorios/categorias')
+        .query(PERIODO)
+        .set('Authorization', authorization),
+    ]);
+
+    expect(extrato.status).toBe(200);
+    expect(relatorio.status).toBe(200);
+
+    const variacaoDoExtrato = new Prisma.Decimal(extrato.body.saldoFinal).minus(
+      extrato.body.saldoAnterior,
+    );
+    const variacaoDoRelatorio = new Prisma.Decimal(relatorio.body.totais.entradas).minus(
+      relatorio.body.totais.saidas,
+    );
+
+    // A invariante vem primeiro e sozinha. Valores absolutos de saldo e de totais ja estao presos
+    // nas suites de cada endpoint; repeti-los aqui faria a assercao absoluta falhar antes e a
+    // invariante nunca executar, deixando de cobrir justamente a divergencia entre os dois.
+    expect(variacaoDoExtrato.toFixed(2)).toBe(variacaoDoRelatorio.toFixed(2));
+
+    // Guarda contra passar por ser zero dos dois lados.
+    expect(variacaoDoExtrato.toFixed(2)).not.toBe('0.00');
   });
 });
