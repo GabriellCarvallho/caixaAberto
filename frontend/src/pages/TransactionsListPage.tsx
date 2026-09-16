@@ -237,7 +237,7 @@ export function TransactionsListPage() {
 
       <Link to="/lancamentos/saida">Registrar saída</Link>
       <br />
-      <Link to="/relatorios/categorias">Relatorio por categoria</Link>
+      <Link to="/relatorios/categorias">Relatório por categoria</Link>
     </main>
   );
 }

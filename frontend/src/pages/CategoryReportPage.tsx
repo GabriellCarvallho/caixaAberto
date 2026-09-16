@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
@@ -45,7 +45,7 @@ function formatarMoeda(valor: string): string {
 }
 
 function rotuloTipo(tipo: CategoryType): string {
-  return tipo === 'ENTRADA' ? 'Entrada' : 'Saida';
+  return tipo === 'ENTRADA' ? 'Entrada' : 'Saída';
 }
 
 export function CategoryReportPage() {
@@ -92,7 +92,7 @@ export function CategoryReportPage() {
           setErro(
             error instanceof ApiError
               ? error.message
-              : 'Nao foi possivel carregar o relatorio por categoria',
+              : 'Não foi possível carregar o relatório por categoria',
           );
         }
       } finally {
@@ -113,7 +113,7 @@ export function CategoryReportPage() {
     event.preventDefault();
 
     if (dataFim < dataInicio) {
-      setErro('Periodo invalido: a data final deve ser maior ou igual a data inicial.');
+      setErro('Período inválido: a data final deve ser maior ou igual a data inicial.');
       setRelatorio(null);
       return;
     }
@@ -123,7 +123,7 @@ export function CategoryReportPage() {
 
   return (
     <main>
-      <h1>Relatorio por categoria</h1>
+      <h1>Relatório por categoria</h1>
 
       <form onSubmit={handleSubmit}>
         <label>
@@ -154,22 +154,22 @@ export function CategoryReportPage() {
 
       {relatorio && (
         <>
-          <section className="report-summary" aria-label="Totais do periodo">
+          <section className="report-summary" aria-label="Totais do período">
             <article>
               <h2>Entradas</h2>
               <p>{formatarMoeda(relatorio.totais.entradas)}</p>
             </article>
             <article>
-              <h2>Saidas</h2>
+              <h2>Saídas</h2>
               <p>{formatarMoeda(relatorio.totais.saidas)}</p>
             </article>
           </section>
 
           {relatorio.categorias.length === 0 ? (
-            <p>Nenhuma movimentacao encontrada para o periodo informado.</p>
+            <p>Nenhuma movimentação encontrada para o período informado.</p>
           ) : (
             <>
-              <section className="category-chart" aria-label="Grafico por categoria">
+              <section className="category-chart" aria-label="Gráfico por categoria">
                 {relatorio.categorias.map((categoria) => {
                   const total = Number(categoria.total);
                   const largura = maiorTotal > 0 ? Math.max((total / maiorTotal) * 100, 2) : 0;
