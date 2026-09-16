@@ -9,10 +9,8 @@ export function setToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
 }
 
-export function getOrganizationId(): string | null {
-  return localStorage.getItem(ORGANIZATION_ID_KEY);
-}
-
+// A organizacao passou a vir do contexto autenticado no backend. Nada mais le esta chave:
+// ela sobrevive apenas enquanto o login ainda exibe o campo temporario de organizacao.
 export function setOrganizationId(organizationId: string): void {
   localStorage.setItem(ORGANIZATION_ID_KEY, organizationId);
 }

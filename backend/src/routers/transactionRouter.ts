@@ -1,19 +1,20 @@
 import { Router } from 'express';
 import * as transactionController from '../controllers/transactionController.js';
 import { authenticate } from '../middlewares/auth.js';
+import { loadContext } from '../middlewares/load-context.js';
 
 const router = Router();
 
 // US18 + US19: Registrar lançamento financeiro
-// Body: { organizationId, categoryId, amount, date, description, tipo, source?, recipient? }
-router.post('/', authenticate, transactionController.createTransaction);
+// Body: { categoryId, amount, date, description, tipo, source?, recipient? }
+router.post('/', authenticate, loadContext, transactionController.createTransaction);
 
 // US29: Consultar resumo financeiro mensal
-// Ex.: GET /api/lancamentos/resumo/mensal?organizationId=10&mes=2026-09
-router.get('/resumo/mensal', authenticate, transactionController.monthlySummary);
+// Ex.: GET /api/lancamentos/resumo/mensal?mes=2026-09
+router.get('/resumo/mensal', authenticate, loadContext, transactionController.monthlySummary);
 
 // US24: Visualizar detalhes do lançamento
-// Ex.: GET /api/lancamentos/123?organizationId=10
-router.get('/:id', authenticate, transactionController.getOne);
+// Ex.: GET /api/lancamentos/123
+router.get('/:id', authenticate, loadContext, transactionController.getOne);
 
 export default router;

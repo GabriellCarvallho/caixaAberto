@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
-import { getOrganizationId } from '../lib/session';
 
 export type TransactionType = 'ENTRADA' | 'SAIDA';
 
@@ -70,7 +69,6 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
       const lancamento = await apiRequest<TransactionResponse>('/transactions', {
         method: 'POST',
         body: {
-          organizationId: getOrganizationId(),
           categoryId: categoriaId,
           amount: valor,
           date: data,

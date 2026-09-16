@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
-import { getOrganizationId } from '../lib/session';
 
 interface MonthlySummaryResponse {
   month: string;
@@ -39,11 +38,7 @@ export function MonthlySummaryPage() {
       setCarregando(true);
       setErro(null);
 
-      const organizationId = getOrganizationId();
-      const params = new URLSearchParams({
-        organizationId: organizationId ?? '',
-        mes: mesSelecionado,
-      });
+      const params = new URLSearchParams({ mes: mesSelecionado });
 
       try {
         const dados = await apiRequest<MonthlySummaryResponse>(

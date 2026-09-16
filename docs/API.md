@@ -58,7 +58,7 @@ canônico definido neste documento e serão migrados em trabalho próprio:
 - `/transactions/resumo/mensal` ainda responde no lugar de `/resumos/mensal`;
 - `/transparency/:publicLink` ainda responde no lugar de `/publico/{token}`;
 - essas rotas ainda recebem ou devolvem propriedades como `name`, `password`, `user`,
-  `organizationId`, `categoryId`, `amount`, `description`, `source` e `recipient`.
+  `categoryId`, `amount`, `description`, `source` e `recipient`.
 
 Até a migração ser concluída, clientes que consumirem os caminhos temporários devem considerar que
 eles ainda não cumprem integralmente os formatos abaixo.
@@ -260,8 +260,7 @@ Erros:
 - `403`: papel sem permissão ou vínculo inativo;
 - `404`: categoria inexistente na organização do contexto.
 
-Compatibilidade atual: responde em `POST /transactions`, recebe campos em inglês e exige
-`organizationId` no corpo.
+Compatibilidade atual: responde em `POST /transactions` e recebe campos em inglês.
 
 ### `GET /lancamentos`
 
@@ -327,8 +326,7 @@ Erros:
 - `403`: usuário sem vínculo ativo;
 - `404`: lançamento ausente ou pertencente a outra organização.
 
-Compatibilidade atual: responde em `GET /transactions/:id`, exige `organizationId` na query e
-devolve propriedades em inglês.
+Compatibilidade atual: responde em `GET /transactions/:id` e devolve propriedades em inglês.
 
 ### `POST /lancamentos/{id}/comprovante`
 
@@ -454,8 +452,8 @@ Erros:
 - `401`: autenticação ausente ou inválida;
 - `403`: usuário sem vínculo ativo.
 
-Compatibilidade atual: responde em `GET /transactions/resumo/mensal`, exige `organizationId` na
-query e devolve `month`, `entries`, `exits`, `balance` e `previousMonth`.
+Compatibilidade atual: responde em `GET /transactions/resumo/mensal` e devolve `month`,
+`entries`, `exits`, `balance` e `previousMonth`.
 
 ## Transparência pública
 
