@@ -1,4 +1,4 @@
-﻿import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
 
@@ -26,7 +26,7 @@ interface CategorySelectProps {
 
 const ROTULO_TIPO: Record<CategoryType, string> = {
   ENTRADA: 'Entrada',
-  SAIDA: 'Saida',
+  SAIDA: 'Saída',
 };
 
 export function CategorySelect({
@@ -61,7 +61,7 @@ export function CategorySelect({
         if (!cancelado) {
           setCategorias([]);
           setErro(
-            error instanceof ApiError ? error.message : 'Nao foi possivel carregar categorias',
+            error instanceof ApiError ? error.message : 'Não foi possível carregar categorias',
           );
         }
       } finally {
@@ -96,7 +96,7 @@ export function CategorySelect({
           {carregando
             ? 'Carregando categorias...'
             : erro
-              ? 'Nao foi possivel carregar categorias'
+              ? 'Não foi possível carregar categorias'
               : categorias.length === 0
                 ? 'Nenhuma categoria disponivel'
                 : 'Selecione uma categoria'}
