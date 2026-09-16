@@ -30,9 +30,9 @@ export function PublicLinkManagementPage() {
         method: 'POST',
       });
       setLink(resposta);
-      setMensagem('Link publico gerado e ativado.');
+      setMensagem('Link público gerado e ativado.');
     } catch (error) {
-      setErro(error instanceof ApiError ? error.message : 'Nao foi possivel gerar o link publico');
+      setErro(error instanceof ApiError ? error.message : 'Não foi possível gerar o link público');
     } finally {
       setProcessando(false);
     }
@@ -49,10 +49,10 @@ export function PublicLinkManagementPage() {
         body: { ativo },
       });
       setLink(resposta);
-      setMensagem(ativo ? 'Link publico ativado.' : 'Link publico desativado.');
+      setMensagem(ativo ? 'Link público ativado.' : 'Link público desativado.');
     } catch (error) {
       setErro(
-        error instanceof ApiError ? error.message : 'Nao foi possivel alterar o link publico',
+        error instanceof ApiError ? error.message : 'Não foi possível alterar o link público',
       );
     } finally {
       setProcessando(false);
@@ -70,9 +70,9 @@ export function PublicLinkManagementPage() {
 
     try {
       await navigator.clipboard.writeText(urlPublica);
-      setMensagem('Link publico copiado.');
+      setMensagem('Link público copiado.');
     } catch {
-      setErro('Nao foi possivel copiar o link publico.');
+      setErro('Não foi possível copiar o link público.');
     } finally {
       setCopiando(false);
     }
@@ -80,21 +80,21 @@ export function PublicLinkManagementPage() {
 
   return (
     <main>
-      <h1>Link publico</h1>
+      <h1>Link público</h1>
 
       <section className="public-link-panel">
-        <p>Status: {link ? (link.ativo ? 'Ativo' : 'Inativo') : 'Nao gerado nesta sessao'}</p>
+        <p>Status: {link ? (link.ativo ? 'Ativo' : 'Inativo') : 'Não gerado nesta sessão'}</p>
 
         {link && (
           <label>
-            Endereco publico
+            Endereço público
             <input type="text" value={urlPublica} readOnly />
           </label>
         )}
 
         <div className="public-link-actions">
           <button type="button" onClick={gerarLink} disabled={processando}>
-            {link ? 'Gerar novo link' : 'Gerar link publico'}
+            {link ? 'Gerar novo link' : 'Gerar link público'}
           </button>
 
           <button type="button" onClick={copiarLink} disabled={!link || copiando}>

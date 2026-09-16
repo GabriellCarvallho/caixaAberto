@@ -30,9 +30,9 @@ export function ProtectedRoute() {
   return (
     <>
       <header>
-        <nav aria-label="Navegacao principal">
-          <Link to="/lancamentos">Lancamentos</Link>
-          <Link to="/organizacao/link-publico">Link publico</Link>
+        <nav aria-label="Navegação principal">
+          <Link to="/lancamentos">Lançamentos</Link>
+          <Link to="/organizacao/link-publico">Link público</Link>
         </nav>
 
         <button type="button" onClick={handleLogout} disabled={saindo}>
