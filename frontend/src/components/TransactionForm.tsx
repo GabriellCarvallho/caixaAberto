@@ -1,22 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
+import { CategorySelect } from './CategorySelect';
 
 export type TransactionType = 'ENTRADA' | 'SAIDA';
 
 interface TransactionResponse {
   id: string;
   type: TransactionType;
-}
-
-interface CategoryOption {
-  id: string;
-  nome: string;
-}
-
-interface CategoryListResponse {
-  dados: CategoryOption[];
 }
 
 interface TransactionFormProps {
@@ -30,7 +22,6 @@ const ROTULOS: Record<TransactionType, { titulo: string; camposParte: string }> 
 };
 
 export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
-  const [categorias, setCategorias] = useState<CategoryOption[]>([]);
   const [categoriaId, setCategoriaId] = useState('');
   const [valor, setValor] = useState('');
   const [data, setData] = useState('');
@@ -40,25 +31,6 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   const [enviando, setEnviando] = useState(false);
 
   const rotulo = ROTULOS[tipo];
-
-  useEffect(() => {
-    let cancelado = false;
-
-    async function carregarCategorias() {
-      try {
-        const resposta = await apiRequest<CategoryListResponse>(`/categorias?tipo=${tipo}`);
-        if (!cancelado) setCategorias(resposta.dados);
-      } catch {
-        // Falha ao carregar categorias não impede o formulário de aparecer.
-      }
-    }
-
-    void carregarCategorias();
-
-    return () => {
-      cancelado = true;
-    };
-  }, [tipo]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -101,23 +73,13 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
     >
       <h2>{rotulo.titulo}</h2>
 
-      <label>
-        Categoria
-        <select
-          value={categoriaId}
-          onChange={(event) => setCategoriaId(event.target.value)}
-          required
-        >
-          <option value="" disabled>
-            Selecione uma categoria
-          </option>
-          {categorias.map((categoria) => (
-            <option key={categoria.id} value={categoria.id}>
-              {categoria.nome}
-            </option>
-          ))}
-        </select>
-      </label>
+      <CategorySelect
+        tipo={tipo}
+        value={categoriaId}
+        onChange={setCategoriaId}
+        required
+        disabled={enviando}
+      />
 
       <label>
         Valor (R$)
