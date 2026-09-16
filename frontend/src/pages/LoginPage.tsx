@@ -3,18 +3,21 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
-import { setOrganizationId, setToken } from '../lib/session';
+import { clearSession, setToken } from '../lib/session';
 
 interface LoginResponse {
   token: string;
-  user: { id: string; name: string; email: string };
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 export function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [organizacaoId, setOrganizacaoIdCampo] = useState('');
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -27,12 +30,15 @@ export function LoginPage() {
       const resposta = await apiRequest<LoginResponse>('/auth/login', {
         method: 'POST',
         auth: false,
-        body: { email, password: senha },
+        body: {
+          email,
+          password: senha,
+        },
       });
 
+      clearSession();
       setToken(resposta.token);
-      setOrganizationId(organizacaoId.trim());
-      navigate('/lancamentos');
+      navigate('/lancamentos', { replace: true });
     } catch (error) {
       setErro(error instanceof ApiError ? error.message : 'Não foi possível entrar');
     } finally {
@@ -52,6 +58,7 @@ export function LoginPage() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            disabled={enviando}
           />
         </label>
 
@@ -62,19 +69,8 @@ export function LoginPage() {
             value={senha}
             onChange={(event) => setSenha(event.target.value)}
             required
+            disabled={enviando}
           />
-        </label>
-
-        <label>
-          ID da organização
-          <input
-            type="text"
-            inputMode="numeric"
-            value={organizacaoId}
-            onChange={(event) => setOrganizacaoIdCampo(event.target.value)}
-            required
-          />
-          <small>Temporário: ainda não existe endpoint para listar suas organizações.</small>
         </label>
 
         {erro && <p role="alert">{erro}</p>}
