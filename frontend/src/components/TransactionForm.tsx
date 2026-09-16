@@ -27,9 +27,12 @@ const ROTULOS: Record<TransactionType, { titulo: string; camposParte: string }> 
   SAIDA: { titulo: 'Registrar saída financeira', camposParte: 'Destinatário' },
 };
 
+function normalizarValor(valor: string): string {
+  return valor.replace(',', '.');
+}
+
 function validarValor(valor: string): boolean {
-  const valorNormalizado = valor.replace(',', '.');
-  const numero = Number(valorNormalizado);
+  const numero = Number(normalizarValor(valor));
 
   return Number.isFinite(numero) && numero > 0;
 }
@@ -82,7 +85,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
         method: 'POST',
         body: {
           categoryId: categoriaId,
-          amount: valor,
+          amount: normalizarValor(valor),
           date: data,
           description: descricao,
           tipo,
@@ -110,6 +113,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
+      noValidate
       className={`transaction-form transaction-form--${tipo.toLowerCase()}`}
     >
       <h2>{rotulo.titulo}</h2>
@@ -123,6 +127,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
         }}
         required
         disabled={enviando}
+        invalid={Boolean(errosCampos.categoriaId)}
       />
       {errosCampos.categoriaId && <small role="alert">{errosCampos.categoriaId}</small>}
 

@@ -19,6 +19,7 @@ interface CategorySelectProps {
   value: string;
   onChange: (categoryId: string) => void;
   disabled?: boolean;
+  invalid?: boolean;
   required?: boolean;
   label?: string;
   name?: string;
@@ -34,6 +35,7 @@ export function CategorySelect({
   value,
   onChange,
   disabled = false,
+  invalid = false,
   required = false,
   label = 'Categoria',
   name = 'categoriaId',
@@ -90,7 +92,7 @@ export function CategorySelect({
         onChange={(event) => onChange(event.target.value)}
         required={required}
         disabled={selectDesabilitado}
-        aria-invalid={erro ? true : undefined}
+        aria-invalid={erro || invalid ? true : undefined}
       >
         <option value="" disabled>
           {carregando
