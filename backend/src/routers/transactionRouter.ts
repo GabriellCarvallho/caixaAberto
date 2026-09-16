@@ -6,8 +6,8 @@ import { loadContext } from '../middlewares/load-context.js';
 const router = Router();
 
 // US18 + US19: Registrar lançamento financeiro
-// Body: { organizationId, categoryId, amount, date, description, tipo, source?, recipient? }
-router.post('/', authenticate, transactionController.createTransaction);
+// Body: { categoryId, amount, date, description, tipo, source?, recipient? }
+router.post('/', authenticate, loadContext, transactionController.createTransaction);
 
 // US29: Consultar resumo financeiro mensal
 // Ex.: GET /api/lancamentos/resumo/mensal?mes=2026-09

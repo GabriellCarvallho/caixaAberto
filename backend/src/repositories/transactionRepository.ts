@@ -63,22 +63,6 @@ export async function getOrganizationById(id: bigint) {
   });
 }
 
-export async function getMembership(userId: bigint, organizationId: bigint) {
-  return prisma.membership.findUnique({
-    where: {
-      userId_organizationId: {
-        userId,
-        organizationId,
-      },
-    },
-    select: {
-      id: true,
-      role: true,
-      active: true,
-    },
-  });
-}
-
 export async function getCategoryForOrganization(
   categoryId: bigint,
   organizationId: bigint,

@@ -86,4 +86,49 @@ describe('organização dos lançamentos vem do contexto autenticado', () => {
 
     expect(response.status).toBe(403);
   });
+  it('registra o lançamento na organização do vínculo sem recebê-la no corpo', async () => {
+    const { organization, authorization } = await createOrganizationWithTreasurer();
+    const categoria = await createCategory({
+      organizationId: organization.id,
+      type: 'ENTRADA',
+    });
+
+    const response = await request(createApp())
+      .post('/transactions')
+      .set('Authorization', authorization)
+      .send({
+        categoryId: categoria.id.toString(),
+        amount: '150.00',
+        date: '2026-09-15',
+        description: 'Doação recebida',
+        tipo: 'ENTRADA',
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.organizationId).toBe(organization.id.toString());
+  });
+
+  it('ignora a organização informada pelo cliente e usa a do contexto', async () => {
+    const { organization, authorization } = await createOrganizationWithTreasurer();
+    const outra = await createOrganization();
+    const categoria = await createCategory({
+      organizationId: organization.id,
+      type: 'SAIDA',
+    });
+
+    const response = await request(createApp())
+      .post('/transactions')
+      .set('Authorization', authorization)
+      .send({
+        organizationId: outra.id.toString(),
+        categoryId: categoria.id.toString(),
+        amount: '40.00',
+        date: '2026-09-15',
+        description: 'Compra de material',
+        tipo: 'SAIDA',
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.organizationId).toBe(organization.id.toString());
+  });
 });

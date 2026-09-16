@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
-import type { AuthRequest } from '../middlewares/auth.js';
 import { getContexto } from '../middlewares/load-context.js';
 import * as transactionRepository from '../repositories/transactionRepository.js';
 
@@ -34,11 +33,6 @@ function parseMoney(value: unknown): Prisma.Decimal | null {
   }
 }
 
-function getAuthenticatedUserId(req: Request): bigint | null {
-  const user = (req as AuthRequest).user;
-  return parseBigInt(user?.id);
-}
-
 function serialize(value: unknown): unknown {
   return JSON.parse(
     JSON.stringify(value, (_key, item) => {
@@ -52,11 +46,9 @@ function serialize(value: unknown): unknown {
 
 async function create(req: Request, res: Response, forcedType: TransactionType) {
   try {
-    const userId = getAuthenticatedUserId(req);
-    if (!userId) return res.status(401).json({ error: 'Usuário não autenticado.' });
+    const { organizacaoId: organizationId, usuarioId: userId } = getContexto(req);
 
     const {
-      organizationId: rawOrganizationId,
       categoryId: rawCategoryId,
       amount: rawAmount,
       date: rawDate,
@@ -65,14 +57,13 @@ async function create(req: Request, res: Response, forcedType: TransactionType) 
       recipient,
     } = req.body ?? {};
 
-    const organizationId = parseBigInt(rawOrganizationId);
     const categoryId = parseBigInt(rawCategoryId);
     const amount = parseMoney(rawAmount);
     const date = parseDateOnly(rawDate);
 
-    if (!organizationId || !categoryId || !amount || !date || !description) {
+    if (!categoryId || !amount || !date || !description) {
       return res.status(400).json({
-        error: 'organizationId, categoryId, amount, date e description são obrigatórios e válidos.',
+        error: 'categoryId, amount, date e description são obrigatórios e válidos.',
       });
     }
 
@@ -105,11 +96,6 @@ async function create(req: Request, res: Response, forcedType: TransactionType) 
       return res.status(400).json({
         error: 'A data do lançamento deve estar dentro do período de gestão da organização.',
       });
-    }
-
-    const membership = await transactionRepository.getMembership(userId, organizationId);
-    if (!membership?.active) {
-      return res.status(403).json({ error: 'Usuário não possui vínculo ativo com a organização.' });
     }
 
     const category = await transactionRepository.getCategoryForOrganization(
