@@ -453,8 +453,8 @@ Erros:
 - `401`: autenticação ausente ou inválida;
 - `403`: usuário sem vínculo ativo.
 
-Compatibilidade atual: responde em `GET /transactions/resumo/mensal`, exige `organizationId` na
-query e devolve `month`, `entries`, `exits`, `balance` e `previousMonth`.
+Compatibilidade atual: responde em `GET /transactions/resumo/mensal` e devolve `month`,
+`entries`, `exits`, `balance` e `previousMonth`.
 
 ## Transparência pública
 

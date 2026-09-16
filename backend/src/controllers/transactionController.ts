@@ -218,16 +218,7 @@ function totalOf(
 
 export async function monthlySummary(req: Request, res: Response) {
   try {
-    const userId = getAuthenticatedUserId(req);
-    if (!userId) return res.status(401).json({ error: 'Usuário não autenticado.' });
-
-    const organizationId = parseBigInt(req.query.organizationId);
-    if (!organizationId) return res.status(400).json({ error: 'organizationId é obrigatório.' });
-
-    const membership = await transactionRepository.getMembership(userId, organizationId);
-    if (!membership?.active) {
-      return res.status(403).json({ error: 'Usuário não possui vínculo ativo com a organização.' });
-    }
+    const { organizacaoId: organizationId } = getContexto(req);
 
     const range = getMonthRange(typeof req.query.mes === 'string' ? req.query.mes : undefined);
     if (!range) return res.status(400).json({ error: 'mes deve estar no formato YYYY-MM.' });
