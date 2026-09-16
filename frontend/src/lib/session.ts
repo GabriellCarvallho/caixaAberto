@@ -1,4 +1,6 @@
 const TOKEN_KEY = 'caixaAberto.token';
+// Chave legada: a organizacao passou a vir do contexto autenticado no backend e o login nao a
+// grava mais. Continua sendo limpa para nao deixar residuo em quem ja usou as versoes anteriores.
 const ORGANIZATION_ID_KEY = 'caixaAberto.organizationId';
 
 export function getToken(): string | null {
@@ -7,12 +9,6 @@ export function getToken(): string | null {
 
 export function setToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token);
-}
-
-// A organizacao passou a vir do contexto autenticado no backend. Nada mais le esta chave:
-// ela sobrevive apenas enquanto o login ainda exibe o campo temporario de organizacao.
-export function setOrganizationId(organizationId: string): void {
-  localStorage.setItem(ORGANIZATION_ID_KEY, organizationId);
 }
 
 export function clearSession(): void {
