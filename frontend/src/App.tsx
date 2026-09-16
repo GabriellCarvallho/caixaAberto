@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { CategoryReportPage } from './pages/CategoryReportPage';
 import { LoginPage } from './pages/LoginPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { NewOutflowPage } from './pages/NewOutflowPage';
@@ -21,6 +22,7 @@ export function App() {
         <Route path="/lancamentos/:id" element={<TransactionDetailPage />} />
         <Route path="/resumo" element={<MonthlySummaryPage />} />
         <Route path="/extrato" element={<StatementPage />} />
+        <Route path="/relatorios/categorias" element={<CategoryReportPage />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/lancamentos" replace />} />
