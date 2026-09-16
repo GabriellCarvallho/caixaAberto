@@ -22,6 +22,15 @@ interface TransactionListResponse {
   paginacao: { pagina: number; tamanhoPagina: number; total: number; totalPaginas: number };
 }
 
+interface CategoryOption {
+  id: string;
+  nome: string;
+}
+
+interface CategoryListResponse {
+  dados: CategoryOption[];
+}
+
 interface Filtros {
   dataInicio: string;
   dataFim: string;
@@ -52,8 +61,25 @@ export function TransactionsListPage() {
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIAIS);
   const [pagina, setPagina] = useState(1);
   const [resultado, setResultado] = useState<TransactionListResponse | null>(null);
+  const [categorias, setCategorias] = useState<CategoryOption[]>([]);
   const [erro, setErro] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    let cancelado = false;
+
+    apiRequest<CategoryListResponse>('/categorias')
+      .then((resposta) => {
+        if (!cancelado) setCategorias(resposta.dados);
+      })
+      .catch(() => {
+        // Filtro de categoria fica sem opções se a busca falhar; não bloqueia a listagem.
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelado = false;
@@ -70,9 +96,7 @@ export function TransactionsListPage() {
       } catch (error) {
         if (!cancelado) {
           setErro(
-            error instanceof ApiError
-              ? error.message
-              : 'Não foi possível carregar os lançamentos',
+            error instanceof ApiError ? error.message : 'Não foi possível carregar os lançamentos',
           );
         }
       } finally {
@@ -135,16 +159,20 @@ export function TransactionsListPage() {
         </label>
 
         <label>
-          ID da categoria
-          <input
-            type="text"
-            inputMode="numeric"
+          Categoria
+          <select
             value={filtros.categoriaId}
             onChange={(event) =>
               setFiltros((atual) => ({ ...atual, categoriaId: event.target.value }))
             }
-          />
-          <small>Temporário: ainda não existe seletor de categorias (US17).</small>
+          >
+            <option value="">Todas</option>
+            {categorias.map((categoria) => (
+              <option key={categoria.id} value={categoria.id}>
+                {categoria.nome}
+              </option>
+            ))}
+          </select>
         </label>
 
         <button type="submit">Filtrar</button>

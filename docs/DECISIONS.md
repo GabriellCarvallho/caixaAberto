@@ -88,13 +88,11 @@ ao usuário. O identificador não é aceito livremente no corpo ou na query dos 
 autenticados. Os routers temporários em inglês permanecem disponíveis até uma migração específica,
 sem mudança de lógica neste ciclo de infraestrutura.
 
-
-
 ## 2026-09-14: Fundação do frontend
 
 O esqueleto do frontend não tinha roteamento nem cliente HTTP. Para a US19, foi adotado
 react-router-dom 7.18.3 para as rotas e um wrapper próprio sobre fetch em src/lib/httpClient.ts,
 sem bibliotecas adicionais de requisição. Um login mínimo foi criado para permitir testar as telas
 autenticadas nesta etapa; o contrato completo de autenticação e a listagem de organizações do
-usuário pertencem à US01/US13 e não são implementados aqui. Enquanto a US17 não existir, o campo de
-categoria dos formulários de lançamento recebe o ID diretamente, sem seletor.
+usuário pertencem à US01/US13 e não são implementados aqui. A US17 (GET /categorias) já existe e é usada para popular o seletor de categoria
+nos formulários e no filtro de lançamentos.

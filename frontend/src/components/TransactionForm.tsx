@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
@@ -9,6 +9,15 @@ export type TransactionType = 'ENTRADA' | 'SAIDA';
 interface TransactionResponse {
   id: string;
   type: TransactionType;
+}
+
+interface CategoryOption {
+  id: string;
+  nome: string;
+}
+
+interface CategoryListResponse {
+  dados: CategoryOption[];
 }
 
 interface TransactionFormProps {
@@ -22,6 +31,7 @@ const ROTULOS: Record<TransactionType, { titulo: string; camposParte: string }> 
 };
 
 export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
+  const [categorias, setCategorias] = useState<CategoryOption[]>([]);
   const [categoriaId, setCategoriaId] = useState('');
   const [valor, setValor] = useState('');
   const [data, setData] = useState('');
@@ -31,6 +41,25 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   const [enviando, setEnviando] = useState(false);
 
   const rotulo = ROTULOS[tipo];
+
+  useEffect(() => {
+    let cancelado = false;
+
+    async function carregarCategorias() {
+      try {
+        const resposta = await apiRequest<CategoryListResponse>(`/categorias?tipo=${tipo}`);
+        if (!cancelado) setCategorias(resposta.dados);
+      } catch {
+        // Falha ao carregar categorias não impede o formulário de aparecer.
+      }
+    }
+
+    void carregarCategorias();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [tipo]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,26 +88,37 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
       setParte('');
       onCriado?.(lancamento);
     } catch (error) {
-      setErro(error instanceof ApiError ? error.message : 'Não foi possível registrar o lançamento');
+      setErro(
+        error instanceof ApiError ? error.message : 'Não foi possível registrar o lançamento',
+      );
     } finally {
       setEnviando(false);
     }
   }
 
   return (
-        <form onSubmit={handleSubmit} className={`transaction-form transaction-form--${tipo.toLowerCase()}`}>
+    <form
+      onSubmit={handleSubmit}
+      className={`transaction-form transaction-form--${tipo.toLowerCase()}`}
+    >
       <h2>{rotulo.titulo}</h2>
 
       <label>
-        ID da categoria
-        <input
-          type="text"
-          inputMode="numeric"
+        Categoria
+        <select
           value={categoriaId}
           onChange={(event) => setCategoriaId(event.target.value)}
           required
-        />
-        <small>Temporário: ainda não existe seletor de categorias (US17).</small>
+        >
+          <option value="" disabled>
+            Selecione uma categoria
+          </option>
+          {categorias.map((categoria) => (
+            <option key={categoria.id} value={categoria.id}>
+              {categoria.nome}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label>
@@ -95,7 +135,12 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
 
       <label>
         Data
-        <input type="date" value={data} onChange={(event) => setData(event.target.value)} required />
+        <input
+          type="date"
+          value={data}
+          onChange={(event) => setData(event.target.value)}
+          required
+        />
       </label>
 
       <label>

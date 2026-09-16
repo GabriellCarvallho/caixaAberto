@@ -61,7 +61,9 @@ export function StatementPage() {
         if (!cancelado) setExtrato(dados);
       } catch (error) {
         if (!cancelado) {
-          setErro(error instanceof ApiError ? error.message : 'Não foi possível carregar o extrato');
+          setErro(
+            error instanceof ApiError ? error.message : 'Não foi possível carregar o extrato',
+          );
         }
       } finally {
         if (!cancelado) setCarregando(false);

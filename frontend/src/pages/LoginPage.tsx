@@ -74,9 +74,7 @@ export function LoginPage() {
             onChange={(event) => setOrganizacaoIdCampo(event.target.value)}
             required
           />
-          <small>
-            Temporário: ainda não existe endpoint para listar suas organizações.
-          </small>
+          <small>Temporário: ainda não existe endpoint para listar suas organizações.</small>
         </label>
 
         {erro && <p role="alert">{erro}</p>}

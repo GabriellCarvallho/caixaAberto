@@ -30,7 +30,6 @@ interface TransactionDetail {
 const RECIPIENT_LABEL = 'Destinatário';
 const SOURCE_LABEL = 'Origem';
 
-
 function formatarData(dataISO: string): string {
   const data = new Date(dataISO);
   return data.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -61,9 +60,7 @@ export function TransactionDetailPage() {
       } catch (error) {
         if (!cancelado) {
           setErro(
-            error instanceof ApiError
-              ? error.message
-              : 'Não foi possível carregar o lançamento',
+            error instanceof ApiError ? error.message : 'Não foi possível carregar o lançamento',
           );
         }
       } finally {
