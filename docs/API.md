@@ -327,8 +327,7 @@ Erros:
 - `403`: usuário sem vínculo ativo;
 - `404`: lançamento ausente ou pertencente a outra organização.
 
-Compatibilidade atual: responde em `GET /transactions/:id`, exige `organizationId` na query e
-devolve propriedades em inglês.
+Compatibilidade atual: responde em `GET /transactions/:id` e devolve propriedades em inglês.
 
 ### `POST /lancamentos/{id}/comprovante`
 

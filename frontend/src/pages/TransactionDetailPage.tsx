@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { ApiError, apiRequest } from '../lib/httpClient';
-import { getOrganizationId } from '../lib/session';
 
 type TransactionType = 'ENTRADA' | 'SAIDA';
 
@@ -50,12 +49,8 @@ export function TransactionDetailPage() {
       setCarregando(true);
       setErro(null);
 
-      const organizationId = getOrganizationId();
-
       try {
-        const dados = await apiRequest<TransactionDetail>(
-          `/transactions/${id}?organizationId=${organizationId ?? ''}`,
-        );
+        const dados = await apiRequest<TransactionDetail>(`/transactions/${id}`);
         if (!cancelado) setLancamento(dados);
       } catch (error) {
         if (!cancelado) {

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Prisma } from '../generated/prisma/client.js';
 import type { AuthRequest } from '../middlewares/auth.js';
+import { getContexto } from '../middlewares/load-context.js';
 import * as transactionRepository from '../repositories/transactionRepository.js';
 
 const TRANSACTION_TYPES = ['ENTRADA', 'SAIDA'] as const;
@@ -167,20 +168,10 @@ export async function createExit(req: Request, res: Response) {
 
 export async function getOne(req: Request, res: Response) {
   try {
-    const userId = getAuthenticatedUserId(req);
-    if (!userId) return res.status(401).json({ error: 'Usuário não autenticado.' });
+    const { organizacaoId: organizationId } = getContexto(req);
 
     const id = parseBigInt(req.params.id);
-    const organizationId = parseBigInt(req.query.organizationId);
-
-    if (!id || !organizationId) {
-      return res.status(400).json({ error: 'id e organizationId são obrigatórios.' });
-    }
-
-    const membership = await transactionRepository.getMembership(userId, organizationId);
-    if (!membership?.active) {
-      return res.status(403).json({ error: 'Usuário não possui vínculo ativo com a organização.' });
-    }
+    if (!id) return res.status(400).json({ error: 'id é obrigatório.' });
 
     const transaction = await transactionRepository.findTransactionById(id, organizationId);
     if (!transaction) return res.status(404).json({ error: 'Lançamento não encontrado.' });
