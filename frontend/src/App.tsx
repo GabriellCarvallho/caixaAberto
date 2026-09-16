@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
 import { NewOutflowPage } from './pages/NewOutflowPage';
+import { PublicLinkManagementPage } from './pages/PublicLinkManagementPage';
 import { PublicTransparencyPage } from './pages/PublicTransparencyPage';
 import { StatementPage } from './pages/StatementPage';
 import { TransactionDetailPage } from './pages/TransactionDetailPage';
@@ -21,6 +22,7 @@ export function App() {
         <Route path="/lancamentos/:id" element={<TransactionDetailPage />} />
         <Route path="/resumo" element={<MonthlySummaryPage />} />
         <Route path="/extrato" element={<StatementPage />} />
+        <Route path="/organizacao/link-publico" element={<PublicLinkManagementPage />} />
       </Route>
 
       <Route path="/" element={<Navigate to="/lancamentos" replace />} />

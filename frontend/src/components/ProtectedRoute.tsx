@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Outlet, useNavigate } from 'react-router-dom';
 
 import { apiRequest } from '../lib/httpClient';
 import { clearSession, isAuthenticated } from '../lib/session';
@@ -30,6 +30,11 @@ export function ProtectedRoute() {
   return (
     <>
       <header>
+        <nav aria-label="Navegacao principal">
+          <Link to="/lancamentos">Lancamentos</Link>
+          <Link to="/organizacao/link-publico">Link publico</Link>
+        </nav>
+
         <button type="button" onClick={handleLogout} disabled={saindo}>
           {saindo ? 'Saindo...' : 'Sair'}
         </button>
