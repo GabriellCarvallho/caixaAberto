@@ -72,7 +72,9 @@ describe('autenticação da sessão', () => {
     expect(semSenha.status).toBe(400);
     expect(semSenha.body.error).toBe('Preencha e-mail e senha');
 
-    const semEmail = await request(createApp()).post('/auth/login').send({ password: SENHA_VALIDA });
+    const semEmail = await request(createApp())
+      .post('/auth/login')
+      .send({ password: SENHA_VALIDA });
 
     expect(semEmail.status).toBe(400);
     expect(semEmail.body.error).toBe('Preencha e-mail e senha');

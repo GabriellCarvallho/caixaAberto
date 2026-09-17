@@ -164,7 +164,8 @@ describe('registro de entrada financeira (US18)', () => {
         categoryId: categoria.id.toString(),
         amount: '300.00',
         date: '2026-09-15',
-        description: 'Entrada que deve refletir no saldo',      });
+        description: 'Entrada que deve refletir no saldo',
+      });
 
     expect(registro.status).toBe(201);
 
