@@ -235,6 +235,8 @@ export function TransactionsListPage() {
         </nav>
       )}
 
+      <Link to="/lancamentos/entrada">Registrar entrada</Link>
+      <br />
       <Link to="/lancamentos/saida">Registrar saída</Link>
       <br />
       <Link to="/relatorios/categorias">Relatório por categoria</Link>

@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { CategoryReportPage } from './pages/CategoryReportPage';
 import { LoginPage } from './pages/LoginPage';
 import { MonthlySummaryPage } from './pages/MonthlySummaryPage';
+import { NewInflowPage } from './pages/NewInflowPage';
 import { NewOutflowPage } from './pages/NewOutflowPage';
 import { PublicLinkManagementPage } from './pages/PublicLinkManagementPage';
 import { PublicTransparencyPage } from './pages/PublicTransparencyPage';
@@ -19,6 +20,7 @@ export function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/lancamentos" element={<TransactionsListPage />} />
+        <Route path="/lancamentos/entrada" element={<NewInflowPage />} />
         <Route path="/lancamentos/saida" element={<NewOutflowPage />} />
         <Route path="/lancamentos/:id" element={<TransactionDetailPage />} />
         <Route path="/resumo" element={<MonthlySummaryPage />} />

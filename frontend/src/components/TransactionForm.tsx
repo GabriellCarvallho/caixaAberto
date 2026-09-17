@@ -16,10 +16,54 @@ interface TransactionFormProps {
   onCriado?: (lancamento: TransactionResponse) => void;
 }
 
+interface FieldErrors {
+  categoriaId?: string;
+  valor?: string;
+  data?: string;
+  descricao?: string;
+}
+
 const ROTULOS: Record<TransactionType, { titulo: string; camposParte: string }> = {
   ENTRADA: { titulo: 'Registrar entrada financeira', camposParte: 'Origem' },
   SAIDA: { titulo: 'Registrar saída financeira', camposParte: 'Destinatário' },
 };
+
+function normalizarValor(valor: string): string {
+  return valor.replace(',', '.');
+}
+
+function validarValor(valor: string): boolean {
+  const numero = Number(normalizarValor(valor));
+
+  return Number.isFinite(numero) && numero > 0;
+}
+
+function validarCampos(
+  categoriaId: string,
+  valor: string,
+  data: string,
+  descricao: string,
+): FieldErrors {
+  const erros: FieldErrors = {};
+
+  if (!categoriaId) {
+    erros.categoriaId = 'Selecione uma categoria.';
+  }
+
+  if (!valor || !validarValor(valor)) {
+    erros.valor = 'Informe um valor maior que zero.';
+  }
+
+  if (!data) {
+    erros.data = 'Informe a data do lançamento.';
+  }
+
+  if (!descricao.trim()) {
+    erros.descricao = 'Informe a descrição do lançamento.';
+  }
+
+  return erros;
+}
 
 export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   const [categoriaId, setCategoriaId] = useState('');
@@ -28,6 +72,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   const [descricao, setDescricao] = useState('');
   const [parte, setParte] = useState('');
   const [erro, setErro] = useState<string | null>(null);
+  const [errosCampos, setErrosCampos] = useState<FieldErrors>({});
   const [enviando, setEnviando] = useState(false);
 
   const rotulo = ROTULOS[tipo];
@@ -35,6 +80,14 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErro(null);
+
+    const proximosErros = validarCampos(categoriaId, valor, data, descricao);
+    setErrosCampos(proximosErros);
+
+    if (Object.keys(proximosErros).length > 0) {
+      return;
+    }
+
     setEnviando(true);
 
     try {
@@ -42,7 +95,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
         method: 'POST',
         body: {
           categoryId: categoriaId,
-          amount: valor,
+          amount: normalizarValor(valor),
           date: data,
           description: descricao,
           tipo,
@@ -56,6 +109,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
       setData('');
       setDescricao('');
       setParte('');
+      setErrosCampos({});
       onCriado?.(lancamento);
     } catch (error) {
       setErro(
@@ -69,6 +123,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
+      noValidate
       className={`transaction-form transaction-form--${tipo.toLowerCase()}`}
     >
       <h2>{rotulo.titulo}</h2>
@@ -76,10 +131,15 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
       <CategorySelect
         tipo={tipo}
         value={categoriaId}
-        onChange={setCategoriaId}
+        onChange={(novoValor) => {
+          setCategoriaId(novoValor);
+          setErrosCampos((atuais) => ({ ...atuais, categoriaId: undefined }));
+        }}
         required
         disabled={enviando}
+        invalid={Boolean(errosCampos.categoriaId)}
       />
+      {errosCampos.categoriaId && <small role="alert">{errosCampos.categoriaId}</small>}
 
       <label>
         Valor (R$)
@@ -88,9 +148,14 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
           inputMode="decimal"
           placeholder="0.00"
           value={valor}
-          onChange={(event) => setValor(event.target.value)}
+          onChange={(event) => {
+            setValor(event.target.value);
+            setErrosCampos((atuais) => ({ ...atuais, valor: undefined }));
+          }}
           required
+          aria-invalid={errosCampos.valor ? true : undefined}
         />
+        {errosCampos.valor && <small role="alert">{errosCampos.valor}</small>}
       </label>
 
       <label>
@@ -98,9 +163,14 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
         <input
           type="date"
           value={data}
-          onChange={(event) => setData(event.target.value)}
+          onChange={(event) => {
+            setData(event.target.value);
+            setErrosCampos((atuais) => ({ ...atuais, data: undefined }));
+          }}
           required
+          aria-invalid={errosCampos.data ? true : undefined}
         />
+        {errosCampos.data && <small role="alert">{errosCampos.data}</small>}
       </label>
 
       <label>
@@ -112,10 +182,15 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
         Descrição
         <textarea
           value={descricao}
-          onChange={(event) => setDescricao(event.target.value)}
+          onChange={(event) => {
+            setDescricao(event.target.value);
+            setErrosCampos((atuais) => ({ ...atuais, descricao: undefined }));
+          }}
           required
           maxLength={5000}
+          aria-invalid={errosCampos.descricao ? true : undefined}
         />
+        {errosCampos.descricao && <small role="alert">{errosCampos.descricao}</small>}
       </label>
 
       {erro && <p role="alert">{erro}</p>}
