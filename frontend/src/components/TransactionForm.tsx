@@ -20,6 +20,7 @@ interface FieldErrors {
   categoriaId?: string;
   valor?: string;
   data?: string;
+  descricao?: string;
 }
 
 const ROTULOS: Record<TransactionType, { titulo: string; camposParte: string }> = {
@@ -37,7 +38,12 @@ function validarValor(valor: string): boolean {
   return Number.isFinite(numero) && numero > 0;
 }
 
-function validarCampos(categoriaId: string, valor: string, data: string): FieldErrors {
+function validarCampos(
+  categoriaId: string,
+  valor: string,
+  data: string,
+  descricao: string,
+): FieldErrors {
   const erros: FieldErrors = {};
 
   if (!categoriaId) {
@@ -50,6 +56,10 @@ function validarCampos(categoriaId: string, valor: string, data: string): FieldE
 
   if (!data) {
     erros.data = 'Informe a data do lançamento.';
+  }
+
+  if (!descricao.trim()) {
+    erros.descricao = 'Informe a descrição do lançamento.';
   }
 
   return erros;
@@ -71,7 +81,7 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
     event.preventDefault();
     setErro(null);
 
-    const proximosErros = validarCampos(categoriaId, valor, data);
+    const proximosErros = validarCampos(categoriaId, valor, data, descricao);
     setErrosCampos(proximosErros);
 
     if (Object.keys(proximosErros).length > 0) {
@@ -172,10 +182,15 @@ export function TransactionForm({ tipo, onCriado }: TransactionFormProps) {
         Descrição
         <textarea
           value={descricao}
-          onChange={(event) => setDescricao(event.target.value)}
+          onChange={(event) => {
+            setDescricao(event.target.value);
+            setErrosCampos((atuais) => ({ ...atuais, descricao: undefined }));
+          }}
           required
           maxLength={5000}
+          aria-invalid={errosCampos.descricao ? true : undefined}
         />
+        {errosCampos.descricao && <small role="alert">{errosCampos.descricao}</small>}
       </label>
 
       {erro && <p role="alert">{erro}</p>}
